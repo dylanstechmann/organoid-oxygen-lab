@@ -1,0 +1,11 @@
+{
+  "radius_um": 300.0,
+  "diffusivity_m2_s": 2e-09,
+  "bulk_oxygen_mol_m3": 0.2,
+  "vmax_mol_m3_s": 0.02,
+  "km_mol_m3": 0.01,
+  "transfer_m_s": 2e-05,
+  "threshold_mol_m3": 0.02,
+  "shells": 160,
+  "kinetics": "michaelis_menten"
+}

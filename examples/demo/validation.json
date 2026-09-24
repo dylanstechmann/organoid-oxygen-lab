@@ -1,0 +1,23 @@
+{
+  "kind": "numerical verification, not biological validation",
+  "analytic_zero_order": [
+    {
+      "shells": 20,
+      "max_abs_error_mol_m3": 1.0416666669343932e-05
+    },
+    {
+      "shells": 40,
+      "max_abs_error_mol_m3": 2.6041666674470054e-06
+    },
+    {
+      "shells": 80,
+      "max_abs_error_mol_m3": 6.510416815652675e-07
+    },
+    {
+      "shells": 160,
+      "max_abs_error_mol_m3": 1.6276045944341178e-07
+    }
+  ],
+  "max_sweep_mass_balance_error": 1.4140182529418413e-09,
+  "parameter_source": "illustrative values selected for software demonstration; not fitted or copied as a calibrated organoid parameter set"
+}

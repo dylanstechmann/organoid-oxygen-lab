@@ -1,0 +1,40 @@
+{
+  "parameters": {
+    "radius_um": 300.0,
+    "diffusivity_m2_s": 2e-09,
+    "bulk_oxygen_mol_m3": 0.2,
+    "vmax_mol_m3_s": 0.02,
+    "km_mol_m3": 0.01,
+    "transfer_m_s": 2e-05,
+    "threshold_mol_m3": 0.02,
+    "shells": 160,
+    "kinetics": "michaelis_menten"
+  },
+  "iterations": 7,
+  "scaled_residual": 5.585383139790808e-11,
+  "damkohler_number": 4.499999999999999,
+  "biot_number": 3.0,
+  "minimum_sampled_oxygen_mol_m3": 0.007896437256547442,
+  "surface_oxygen_mol_m3": 0.11571362670400401,
+  "volume_mean_oxygen_mol_m3": 0.06826662232369966,
+  "fraction_volume_below_threshold": 0.06104663085937502,
+  "total_uptake_mol_s": 1.9065128482385974e-12,
+  "surface_influx_mol_s": 1.906512848239881e-12,
+  "relative_mass_balance_error": 6.732626948004671e-13,
+  "interpretation": [
+    "Illustrative model, not calibrated to a cell line or organoid experiment.",
+    "The minimum is sampled at the innermost shell center, not exactly at r=0.",
+    "Below-threshold volume uses piecewise-constant shell values; the threshold is user supplied, not a viability cutoff.",
+    "Spherical, homogeneous, steady state with a fixed bath; no vascularization, growth, heterogeneous uptake or cell death.",
+    "Surface mass transfer is a boundary resistance and cannot be converted to pump flow without another model."
+  ],
+  "schema_version": 1,
+  "environment": {
+    "python": "3.12.14",
+    "numpy": "2.3.5",
+    "scipy": "1.17.0",
+    "oxygenlab": "0.1.0"
+  },
+  "parameters_sha256": "39baa3b3b1606e5a52829a03af4c4c0c6a766669ef70fce00ed7a85ca8757f1c",
+  "input_sha256": null
+}
