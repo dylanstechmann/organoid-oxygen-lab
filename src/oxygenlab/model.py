@@ -47,7 +47,7 @@ class Parameters:
 
     @classmethod
     def from_json(cls, path):
-        values = json.loads(Path(path).read_text())
+        values = json.loads(Path(path).read_text(encoding="utf-8"))
         if not isinstance(values, dict) or set(values) - set(cls.__dataclass_fields__):
             raise ValueError("configuration must be an object containing only recognized parameter names")
         return cls(**values).validate()

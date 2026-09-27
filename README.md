@@ -33,6 +33,13 @@ output directory must be new. `profile.csv` gives radial concentrations and
 shell volume fractions. `summary.json` records settings, convergence and
 conservation diagnostics, parameter/input hashes and software versions.
 
+Configuration and report text use UTF-8 on every platform. Reports are prepared
+in a temporary sibling directory before publication. Failed generation or
+publication removes the new report, and an existing output path is never reused.
+Publication reserves the destination exclusively and moves the prepared files;
+it is not an atomic directory swap or a guarantee against a process crash or
+power loss during those moves.
+
 ## Model and units
 
 At steady state inside a homogeneous sphere,
@@ -76,8 +83,9 @@ the analytic reference; settings that predict negative oxygen are rejected.
   surface influx/uptake across the included size scenarios.
 - Strict parameters, explicit units, volume-weighted summaries and source hashes.
 
-CI runs unit tests and the full plotted demo on Python 3.10 and 3.12. Numerical
-correctness does not establish the suitability of a parameter set for cells.
+CI runs unit tests and the full plotted demo on Python 3.10 and 3.12 on Linux and
+Windows. Numerical correctness does not establish the suitability of a parameter
+set for cells.
 
 ## Research use and limitations
 
