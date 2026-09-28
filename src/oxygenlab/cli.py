@@ -204,6 +204,109 @@ def sweep_vmax(output, parameters=None, vmax_values=(0.0, 0.005, 0.01, 0.02, 0.0
     return {"rows": rows, "core_nonincreasing": monotone, "worst_relative_mass_balance_error": worst}
 
 
+def transfer_sweep_rows(parameters=None, transfer_values_m_s=(2e-6, 5e-6, 1e-5, 2e-5, 5e-5)):
+    """Vary only the illustrative surface mass-transfer coefficient (m/s)."""
+    parameters = (Parameters() if parameters is None else parameters).validate()
+    values = tuple(transfer_values_m_s)
+    if not values:
+        raise ValueError("transfer_values_m_s must contain at least one value")
+    for value in values:
+        if value is None:
+            raise ValueError("transfer_values_m_s must contain finite coefficients in m/s")
+        replace(parameters, transfer_m_s=value).validate()
+    if any(left >= right for left, right in zip(values, values[1:])):
+        raise ValueError("transfer_values_m_s must be strictly increasing")
+
+    rows = []
+    previous = None
+    for transfer in (*values, None):
+        summary = solve(replace(parameters, transfer_m_s=transfer)).summary
+        core = float(summary["minimum_sampled_oxygen_mol_m3"])
+        rows.append({
+            "boundary": "fixed_surface" if transfer is None else "finite_transfer",
+            "radius_um": float(parameters.radius_um),
+            "transfer_m_s": transfer,
+            "minimum_oxygen_mol_m3": core,
+            "surface_oxygen_mol_m3": float(summary["surface_oxygen_mol_m3"]),
+            "fraction_below_threshold": float(summary["fraction_volume_below_threshold"]),
+            "relative_mass_balance_error": float(summary["relative_mass_balance_error"]),
+            "core_did_not_fall": previous is None or core >= previous - 1e-9,
+        })
+        previous = core
+    return rows
+
+
+def sweep_transfer(output, parameters=None, transfer_values_m_s=(2e-6, 5e-6, 1e-5, 2e-5, 5e-5), *, plot=False):
+    """Report one boundary-resistance sensitivity question at fixed uptake and size."""
+    parameters = Parameters() if parameters is None else parameters
+    values = tuple(transfer_values_m_s)
+    rows = transfer_sweep_rows(parameters, values)
+    finite = rows[:-1]
+    fixed = rows[-1]
+    monotone = all(row["core_did_not_fall"] for row in rows)
+    worst = max(row["relative_mass_balance_error"] for row in rows)
+    with _report_directory(output) as staged:
+        settings = {
+            "base_parameters": asdict(parameters),
+            "sweep_parameter": "transfer_m_s",
+            "sweep_unit": "m/s",
+            "transfer_values_m_s": list(values),
+            "fixed_surface_reference": "transfer_m_s = null; no exterior resistance",
+            "provenance": "illustrative values; no measured transfer coefficient or pump-flow conversion",
+        }
+        (staged / "settings.json").write_text(json.dumps(settings, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+        with (staged / "transfer_sweep.csv").open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=list(rows[0]), lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(rows)
+        lines = [
+            "# Illustrative surface-transfer sweep", "",
+            "Question: at fixed radius and uptake, does sampled core oxygen rise as",
+            "the surface mass-transfer coefficient `transfer_m_s` rises?", "",
+            "These coefficients are illustrative m/s values, not measured for an",
+            "organoid. The fixed-surface row removes exterior resistance and is",
+            "a limiting reference, not a finite transfer coefficient or pump flow.", "",
+            "| Boundary | transfer (m/s) | Minimum sampled oxygen (mol/m³) | Surface oxygen (mol/m³) | Mass-balance error |",
+            "|---|---:|---:|---:|---:|",
+        ]
+        for row in rows:
+            transfer = "none" if row["transfer_m_s"] is None else f"{row['transfer_m_s']:.2g}"
+            lines.append(
+                f"| {row['boundary']} | {transfer} | {row['minimum_oxygen_mol_m3']:.6g} | "
+                f"{row['surface_oxygen_mol_m3']:.6g} | {row['relative_mass_balance_error']:.3g} |"
+            )
+        lines += [
+            "", f"Core oxygen was nondecreasing across the grid and fixed limit: {monotone}.",
+            f"Worst relative mass-balance error: {worst:.3g}.",
+            "The user-selected threshold is a descriptive concentration cut, not a viability limit.",
+            "The sphere is homogeneous and steady; this grid is not a calibration.", "",
+        ]
+        if plot:
+            import matplotlib
+            matplotlib.use("Agg")
+            import matplotlib.pyplot as plt
+            fig, ax = plt.subplots(figsize=(7, 4.5))
+            ax.semilogx([row["transfer_m_s"] for row in finite],
+                        [row["minimum_oxygen_mol_m3"] for row in finite], "o-", label="Sampled core")
+            ax.semilogx([row["transfer_m_s"] for row in finite],
+                        [row["surface_oxygen_mol_m3"] for row in finite], "s-", label="Surface")
+            ax.axhline(fixed["minimum_oxygen_mol_m3"], color="#555555", linestyle="--",
+                       label="Fixed-surface core limit")
+            ax.set(xlabel="Surface mass-transfer coefficient k (m/s)",
+                   ylabel="Oxygen concentration (mol/m³)",
+                   title="Illustrative boundary-resistance sensitivity")
+            ax.grid(alpha=0.2)
+            ax.legend()
+            fig.tight_layout()
+            try:
+                fig.savefig(staged / "transfer_sweep.png", dpi=160)
+            finally:
+                plt.close(fig)
+            lines += ["![Illustrative surface-transfer sensitivity](transfer_sweep.png)", ""]
+        (staged / "REPORT.md").write_text("\n".join(lines), encoding="utf-8")
+    return {"rows": rows, "core_nondecreasing": monotone, "worst_relative_mass_balance_error": worst}
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Conservative spherical oxygen transport model")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -213,12 +316,17 @@ def main(argv=None):
     s.add_argument("config"); s.add_argument("--out", required=True)
     sweep = commands.add_parser("sweep-vmax", help="illustrative uptake sweep at the default radius")
     sweep.add_argument("--out", required=True)
+    transfer = commands.add_parser("sweep-transfer", help="illustrative surface-transfer sweep (m/s)")
+    transfer.add_argument("--out", required=True)
+    transfer.add_argument("--plot", action="store_true")
     args = parser.parse_args(argv)
     try:
         if args.command == "demo":
             report = demo(args.out, plot=args.plot)
         elif args.command == "sweep-vmax":
             report = sweep_vmax(args.out)
+        elif args.command == "sweep-transfer":
+            report = sweep_transfer(args.out, plot=args.plot)
         else:
             config = Path(args.config)
             report = save(solve(Parameters.from_json(config)), args.out, input_sha256=hashlib.sha256(config.read_bytes()).hexdigest())

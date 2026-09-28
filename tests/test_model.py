@@ -7,7 +7,7 @@ import unittest
 import numpy as np
 from scipy.integrate import solve_bvp
 
-from oxygenlab.cli import save, vmax_sweep_rows
+from oxygenlab.cli import save, transfer_sweep_rows, vmax_sweep_rows
 from oxygenlab.model import Parameters, solve, zero_order_analytic
 
 
@@ -76,6 +76,16 @@ class OxygenTests(unittest.TestCase):
         self.assertGreater(rows[0]["minimum_oxygen_mol_m3"], rows[-1]["minimum_oxygen_mol_m3"])
         self.assertTrue(all(row["core_did_not_rise"] for row in rows))
         self.assertTrue(all(row["relative_mass_balance_error"] < 1e-6 for row in rows))
+
+    def test_higher_surface_transfer_raises_core_toward_fixed_surface_limit(self):
+        rows = transfer_sweep_rows(Parameters(radius_um=300, shells=80))
+        self.assertEqual(rows[-1]["boundary"], "fixed_surface")
+        self.assertTrue(all(row["core_did_not_fall"] for row in rows))
+        self.assertGreater(rows[-1]["minimum_oxygen_mol_m3"], rows[0]["minimum_oxygen_mol_m3"])
+        self.assertTrue(all(row["relative_mass_balance_error"] < 1e-6 for row in rows))
+        for values in [(1e-5, float("nan")), (0,), (1e-5, 1e-6), (None,)]:
+            with self.subTest(values=values), self.assertRaises(ValueError):
+                transfer_sweep_rows(transfer_values_m_s=values)
 
     def test_invalid_parameters_and_infeasible_constant_uptake(self):
         for field, value in [("radius_um", 0), ("diffusivity_m2_s", -1), ("vmax_mol_m3_s", float("nan")),

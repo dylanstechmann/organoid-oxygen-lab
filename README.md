@@ -10,6 +10,13 @@ volume method keeps local uptake and diffusive fluxes consistent.
 
 `oxygenlab sweep-vmax` holds radius fixed and raises illustrative `vmax`. The question is only whether core oxygen falls and mass balance stays small. It is not a fitted uptake.
 
+`oxygenlab sweep-transfer --out artifacts/transfer --plot` holds radius and
+uptake fixed while varying the illustrative surface mass-transfer coefficient
+in m/s. It compares sampled core and surface oxygen with the fixed-surface
+limit, and saves a CSV, settings JSON, report and labeled figure. This is a
+boundary-resistance sensitivity check, not a measured coefficient or a
+conversion from pump flow.
+
 The [included numerical demonstration](examples/demo/REPORT.md) compares two
 surface conditions across seven sphere sizes and checks an analytic reference
 under mesh refinement. Parameters are **illustrative**, with no experimental
@@ -28,6 +35,7 @@ python -m pip install -e '.[plots]'
 python -m unittest discover -s tests -v
 oxygenlab demo --out artifacts/demo --plot
 oxygenlab sweep-vmax --out artifacts/vmax
+oxygenlab sweep-transfer --out artifacts/transfer --plot
 oxygenlab solve examples/demo/parameters.json --out artifacts/sphere
 ```
 

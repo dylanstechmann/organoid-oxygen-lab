@@ -10,7 +10,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from oxygenlab.cli import demo, main, save
+from oxygenlab.cli import demo, main, save, sweep_transfer
 from oxygenlab.model import Parameters, solve
 
 
@@ -183,6 +183,17 @@ class ReportTests(unittest.TestCase):
         self.assertIn("radius_um", completed.stderr)
         self.assertEqual(completed.stdout, "")
         self.assertEqual({entry.name for entry in self.root.iterdir()}, {"report", "invalid.json"})
+
+    def test_transfer_sweep_report_records_units_and_preserves_existing_output(self):
+        result = sweep_transfer(self.output)
+        self.assertTrue(result["core_nondecreasing"])
+        settings = json.loads((self.output / "settings.json").read_text(encoding="utf-8"))
+        self.assertEqual(settings["sweep_parameter"], "transfer_m_s")
+        self.assertEqual(settings["sweep_unit"], "m/s")
+        self.assertIn("not measured", (self.output / "REPORT.md").read_text(encoding="utf-8"))
+        self.assertTrue((self.output / "transfer_sweep.csv").is_file())
+        with self.assertRaises(FileExistsError):
+            sweep_transfer(self.output)
 
 
 if __name__ == "__main__":
