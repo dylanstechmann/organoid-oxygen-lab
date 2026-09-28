@@ -25,7 +25,7 @@ Use a fresh `--out` directory every time.
 ## Improve, in this order
 
 1. Read `docs/METHODS.md` and `docs/MODEL_CARD.md`. If a comment contradicts the mass balance, fix the comment or the code, and add a regression test.
-2. Add one parameter-sweep question, not a new biological model: vary radius or `vmax` across a small grid and write which qualitative feature moves (core concentration, volume below threshold, mass-balance error). Keep units in the table.
+2. `oxygenlab sweep-vmax` already asks whether core oxygen falls as illustrative `vmax` rises. Do not add another vmax grid. A different single-parameter question (for example `km` or surface `transfer_m_s`) is allowed if the report states the question and keeps units.
 3. If you add a parameter, give its unit in the CLI/JSON schema and reject non-finite values the way existing settings are rejected.
 4. Do not “calibrate” against a dataset that is not in this repo.
 
