@@ -8,6 +8,8 @@ It reports radial profiles, integrated uptake, surface influx, mass-balance
 error and the volume below a user-selected concentration threshold. A finite
 volume method keeps local uptake and diffusive fluxes consistent.
 
+`oxygenlab sweep-vmax` holds radius fixed and raises illustrative `vmax`. The question is only whether core oxygen falls and mass balance stays small. It is not a fitted uptake.
+
 The [included numerical demonstration](examples/demo/REPORT.md) compares two
 surface conditions across seven sphere sizes and checks an analytic reference
 under mesh refinement. Parameters are **illustrative**, with no experimental
@@ -25,6 +27,7 @@ source .venv/bin/activate
 python -m pip install -e '.[plots]'
 python -m unittest discover -s tests -v
 oxygenlab demo --out artifacts/demo --plot
+oxygenlab sweep-vmax --out artifacts/vmax
 oxygenlab solve examples/demo/parameters.json --out artifacts/sphere
 ```
 

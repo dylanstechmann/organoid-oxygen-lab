@@ -146,6 +146,64 @@ def _write_demo(output, *, plot=False):
     return validation
 
 
+def vmax_sweep_rows(parameters=None, vmax_values=(0.0, 0.005, 0.01, 0.02, 0.04)):
+    """Illustrative uptake sweep at fixed geometry. Not a fitted rate."""
+    parameters = Parameters() if parameters is None else parameters
+    rows = []
+    previous = None
+    for vmax in vmax_values:
+        result = solve(replace(parameters, vmax_mol_m3_s=float(vmax)))
+        summary = result.summary
+        core = float(summary["minimum_sampled_oxygen_mol_m3"])
+        rows.append({
+            "radius_um": float(parameters.radius_um),
+            "vmax_mol_m3_s": float(vmax),
+            "minimum_oxygen_mol_m3": core,
+            "fraction_below_threshold": float(summary["fraction_volume_below_threshold"]),
+            "relative_mass_balance_error": float(summary["relative_mass_balance_error"]),
+            "core_did_not_rise": previous is None or core <= previous + 1e-9,
+        })
+        previous = core
+    return rows
+
+
+def sweep_vmax(output, parameters=None, vmax_values=(0.0, 0.005, 0.01, 0.02, 0.04)):
+    rows = vmax_sweep_rows(parameters, vmax_values)
+    with _report_directory(output) as staged:
+        with (staged / "vmax_sweep.csv").open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=list(rows[0]), lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(rows)
+        lines = [
+            "# Illustrative uptake sweep",
+            "",
+            "Question: at fixed radius, does the sampled core oxygen fall as `vmax_mol_m3_s` rises,",
+            "and does the relative mass-balance error stay small?",
+            "",
+            "These `vmax` values are not measured uptake. A per-cell rate still needs a cell density",
+            "before it can be entered as mol/(m³·s).",
+            "",
+            "| vmax (mol/m³/s) | Minimum sampled oxygen (mol/m³) | Volume below threshold | Mass-balance error |",
+            "|---:|---:|---:|---:|",
+        ]
+        for row in rows:
+            lines.append(
+                f"| {row['vmax_mol_m3_s']:g} | {row['minimum_oxygen_mol_m3']:.6g} | "
+                f"{row['fraction_below_threshold']:.4f} | {row['relative_mass_balance_error']:.3g} |"
+            )
+        monotone = all(row["core_did_not_rise"] for row in rows)
+        worst = max(row["relative_mass_balance_error"] for row in rows)
+        lines += [
+            "",
+            f"Core oxygen was nonincreasing across this grid: {monotone}.",
+            f"Worst relative mass-balance error: {worst:.3g}.",
+            "A monotone illustrative grid is not a calibration and not a hypoxia threshold.",
+            "",
+        ]
+        (staged / "REPORT.md").write_text("\n".join(lines), encoding="utf-8")
+    return {"rows": rows, "core_nonincreasing": monotone, "worst_relative_mass_balance_error": worst}
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Conservative spherical oxygen transport model")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -153,10 +211,14 @@ def main(argv=None):
     d.add_argument("--out", required=True); d.add_argument("--plot", action="store_true")
     s = commands.add_parser("solve", help="solve one JSON parameter configuration")
     s.add_argument("config"); s.add_argument("--out", required=True)
+    sweep = commands.add_parser("sweep-vmax", help="illustrative uptake sweep at the default radius")
+    sweep.add_argument("--out", required=True)
     args = parser.parse_args(argv)
     try:
         if args.command == "demo":
             report = demo(args.out, plot=args.plot)
+        elif args.command == "sweep-vmax":
+            report = sweep_vmax(args.out)
         else:
             config = Path(args.config)
             report = save(solve(Parameters.from_json(config)), args.out, input_sha256=hashlib.sha256(config.read_bytes()).hexdigest())

@@ -7,7 +7,7 @@ import unittest
 import numpy as np
 from scipy.integrate import solve_bvp
 
-from oxygenlab.cli import save
+from oxygenlab.cli import save, vmax_sweep_rows
 from oxygenlab.model import Parameters, solve, zero_order_analytic
 
 
@@ -70,6 +70,12 @@ class OxygenTests(unittest.TestCase):
         result = solve(replace(base, threshold_mol_m3=threshold))
         self.assertAlmostEqual(result.summary["fraction_volume_below_threshold"], .5 ** 3, places=12)
         self.assertEqual(solve(replace(base, threshold_mol_m3=0)).summary["fraction_volume_below_threshold"], 0)
+
+    def test_higher_vmax_does_not_raise_core_oxygen(self):
+        rows = vmax_sweep_rows(Parameters(radius_um=300, shells=40))
+        self.assertGreater(rows[0]["minimum_oxygen_mol_m3"], rows[-1]["minimum_oxygen_mol_m3"])
+        self.assertTrue(all(row["core_did_not_rise"] for row in rows))
+        self.assertTrue(all(row["relative_mass_balance_error"] < 1e-6 for row in rows))
 
     def test_invalid_parameters_and_infeasible_constant_uptake(self):
         for field, value in [("radius_um", 0), ("diffusivity_m2_s", -1), ("vmax_mol_m3_s", float("nan")),
