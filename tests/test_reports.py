@@ -195,6 +195,26 @@ class ReportTests(unittest.TestCase):
         with self.assertRaises(FileExistsError):
             sweep_transfer(self.output)
 
+    def test_cli_transient_report_and_preserves_existing_output(self):
+        transient_out = self.root / "transient-out"
+        completed = self.run_cli("transient", "--out", transient_out, "--total-time-s", "60", "--time-steps", "20")
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertTrue((transient_out / "summary.json").is_file())
+        self.assertTrue((transient_out / "transient_profile.csv").is_file())
+        self.assertTrue((transient_out / "radial_snapshots.csv").is_file())
+        self.assertTrue((transient_out / "REPORT.md").is_file())
+
+        summary = json.loads((transient_out / "summary.json").read_text(encoding="utf-8"))
+        self.assertEqual(summary["total_time_s"], 60.0)
+        self.assertEqual(summary["time_steps"], 20)
+        self.assertEqual(summary["initial_core_oxygen_mol_m3"], 0.0)
+
+        # Output cannot be overwritten
+        completed_again = self.run_cli("transient", "--out", transient_out)
+        self.assertEqual(completed_again.returncode, 2)
+        self.assertIn("already exists", completed_again.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()
+

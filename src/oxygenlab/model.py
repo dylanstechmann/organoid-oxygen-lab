@@ -61,6 +61,19 @@ class Solution:
     summary: dict
 
 
+@dataclass
+class TransientSolution:
+    time_s: np.ndarray
+    radius_um: np.ndarray
+    concentration_history_mol_m3: np.ndarray
+    core_oxygen_history_mol_m3: np.ndarray
+    surface_oxygen_history_mol_m3: np.ndarray
+    volume_mean_history_mol_m3: np.ndarray
+    shell_volume_fraction: np.ndarray
+    steady_solution: Solution
+    summary: dict
+
+
 def _system(parameters):
     p = parameters
     radius = p.radius_um * 1e-6
@@ -174,3 +187,140 @@ def zero_order_analytic(radius_um, parameters):
         raise ValueError("reference radii must lie within the sphere")
     surface_drop = 0 if p.transfer_m_s is None else p.vmax_mol_m3_s * radius / (3 * p.transfer_m_s)
     return p.bulk_oxygen_mol_m3 - surface_drop - p.vmax_mol_m3_s * (radius ** 2 - r ** 2) / (6 * p.diffusivity_m2_s)
+
+
+def solve_transient(
+    parameters=Parameters(),
+    total_time_s=1200.0,
+    time_steps=120,
+    initial_oxygen_mol_m3=0.0,
+    *,
+    tolerance=1e-8,
+    max_iterations=50,
+):
+    """Solve the time-dependent PDE in (r, t) from initial conditions to steady state.
+
+    PDE: dc/dt = (D/r^2) d/dr(r^2 dc/dr) - R(c)
+    Boundary conditions:
+      r=0: dc/dr = 0
+      r=R: -D dc/dr = k_transfer (c - c_bulk) [or c=c_bulk if transfer_m_s is None]
+    Initial condition:
+      c(r, 0) = initial_oxygen_mol_m3 (default 0.0, representing anoxia ramp-up)
+    """
+    p = parameters.validate()
+    if isinstance(total_time_s, bool) or not isinstance(total_time_s, (int, float)) or not np.isfinite(total_time_s) or total_time_s <= 0:
+        raise ValueError("total_time_s must be a positive finite number")
+    if isinstance(time_steps, bool) or not isinstance(time_steps, int) or time_steps < 2 or time_steps > 50000:
+        raise ValueError("time_steps must be an integer between 2 and 50000")
+    if isinstance(initial_oxygen_mol_m3, bool) or not isinstance(initial_oxygen_mol_m3, (int, float)) or not np.isfinite(initial_oxygen_mol_m3) or initial_oxygen_mol_m3 < 0:
+        raise ValueError("initial_oxygen_mol_m3 must be a nonnegative finite number")
+
+    steady = solve(p)
+    x, volumes, conductance, banded, boundary, boundary_g, da = _system(p)
+    km = p.km_mol_m3 / p.bulk_oxygen_mol_m3
+    radius = p.radius_um * 1e-6
+    t_scale = radius ** 2 / p.diffusivity_m2_s
+
+    time_s = np.linspace(0.0, float(total_time_s), time_steps)
+    tau = time_s / t_scale
+
+    u_history = np.zeros((time_steps, p.shells))
+    u_init = min(1.0, float(initial_oxygen_mol_m3) / p.bulk_oxygen_mol_m3)
+    u_history[0] = u_init
+
+    u_cur = np.full(p.shells, u_init)
+    for step in range(1, time_steps):
+        dtau = float(tau[step] - tau[step - 1])
+        if dtau <= 0:
+            continue
+        u_old = np.copy(u_cur)
+        for it in range(max_iterations):
+            flux = conductance * (u_cur[1:] - u_cur[:-1])
+            diff = np.zeros_like(u_cur)
+            diff[:-1] -= flux
+            diff[1:] += flux
+            diff[-1] += boundary_g * (u_cur[-1] - 1.0)
+
+            rate = np.ones_like(u_cur) if p.kinetics == "zero_order" else u_cur / (km + u_cur)
+            f = volumes * (u_cur - u_old) / dtau + diff + da * volumes * rate
+
+            jac = banded.copy()
+            jac[1] += volumes / dtau
+            if p.kinetics != "zero_order":
+                jac[1] += da * volumes * km / (km + u_cur) ** 2
+
+            step_delta = solve_banded((1, 1), jac, -f)
+            u_cur += step_delta
+            u_cur = np.maximum(u_cur, 0.0)
+            if np.max(np.abs(step_delta)) < tolerance:
+                break
+        u_history[step] = u_cur
+
+    concentrations = u_history * p.bulk_oxygen_mol_m3
+    core_history = concentrations[:, 0]
+
+    influx_history = np.zeros(time_steps)
+    surface_history = np.zeros(time_steps)
+    uptake_history = np.zeros(time_steps)
+    for step in range(time_steps):
+        u_step = u_history[step]
+        influx_step = float(4 * np.pi * radius * p.diffusivity_m2_s * p.bulk_oxygen_mol_m3 * boundary_g * (1.0 - u_step[-1]))
+        influx_history[step] = influx_step
+        if p.transfer_m_s is None:
+            surface_history[step] = p.bulk_oxygen_mol_m3
+        else:
+            surface_history[step] = p.bulk_oxygen_mol_m3 - influx_step / (4 * np.pi * radius ** 2 * p.transfer_m_s)
+        rate_step = np.ones_like(u_step) if p.kinetics == "zero_order" else u_step / (km + u_step)
+        uptake_history[step] = float(4 * np.pi * radius ** 3 * p.vmax_mol_m3_s * np.sum(volumes * rate_step))
+
+    volume_mean_history = np.sum(3 * volumes[None, :] * concentrations, axis=1)
+
+    steady_core = float(steady.summary["minimum_sampled_oxygen_mol_m3"])
+    t_half = None
+    t_95 = None
+    if steady_core > 1e-9:
+        half_mask = core_history >= 0.5 * steady_core
+        if np.any(half_mask):
+            t_half = float(time_s[np.argmax(half_mask)])
+        pct95_mask = core_history >= 0.95 * steady_core
+        if np.any(pct95_mask):
+            t_95 = float(time_s[np.argmax(pct95_mask)])
+
+    summary = {
+        "parameters": asdict(p),
+        "total_time_s": float(total_time_s),
+        "time_steps": int(time_steps),
+        "initial_oxygen_mol_m3": float(initial_oxygen_mol_m3),
+        "diffusion_time_scale_s": float(t_scale),
+        "initial_core_oxygen_mol_m3": float(core_history[0]),
+        "final_core_oxygen_mol_m3": float(core_history[-1]),
+        "steady_core_oxygen_mol_m3": steady_core,
+        "final_vs_steady_core_error_mol_m3": float(abs(core_history[-1] - steady_core)),
+        "time_to_half_steady_core_s": t_half,
+        "time_to_95pct_steady_core_s": t_95,
+        "final_surface_oxygen_mol_m3": float(surface_history[-1]),
+        "final_volume_mean_oxygen_mol_m3": float(volume_mean_history[-1]),
+        "final_fraction_below_threshold": float(np.sum(3 * volumes[concentrations[-1] < p.threshold_mol_m3])),
+        "final_total_uptake_mol_s": float(uptake_history[-1]),
+        "final_surface_influx_mol_s": float(influx_history[-1]),
+        "interpretation": [
+            "Transient PDE mode solving del(c)/del(t) = D nabla^2(c) - R(c) from initial concentration.",
+            "Illustrative numerical model; parameters need experimental calibration.",
+            "Core oxygen is tracked at innermost shell center, surface at r=R with Robin/Dirichlet boundary.",
+            "Time to 50% and 95% of steady-state core oxygen indicate penetration time from anoxia.",
+            "Spherical, homogeneous organoid model with fixed bath oxygen; no vascularization or cell death."
+        ]
+    }
+
+    return TransientSolution(
+        time_s=time_s,
+        radius_um=x * p.radius_um,
+        concentration_history_mol_m3=concentrations,
+        core_oxygen_history_mol_m3=core_history,
+        surface_oxygen_history_mol_m3=surface_history,
+        volume_mean_history_mol_m3=volume_mean_history,
+        shell_volume_fraction=3 * volumes,
+        steady_solution=steady,
+        summary=summary,
+    )
+

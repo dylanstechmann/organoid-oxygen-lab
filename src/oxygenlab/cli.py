@@ -15,7 +15,7 @@ import numpy as np
 import scipy
 
 from oxygenlab import __version__
-from oxygenlab.model import Parameters, solve, zero_order_analytic
+from oxygenlab.model import Parameters, solve, solve_transient, zero_order_analytic
 
 
 @contextmanager
@@ -307,6 +307,102 @@ def sweep_transfer(output, parameters=None, transfer_values_m_s=(2e-6, 5e-6, 1e-
     return {"rows": rows, "core_nondecreasing": monotone, "worst_relative_mass_balance_error": worst}
 
 
+def save_transient(transient_solution, output, *, input_sha256=None, plot=False):
+    with _report_directory(output) as staged:
+        return _write_transient(transient_solution, staged, input_sha256=input_sha256, plot=plot)
+
+
+def _write_transient(sol, output, *, input_sha256=None, plot=False):
+    report = {
+        **sol.summary,
+        "schema_version": 1,
+        "environment": {
+            "python": platform.python_version(),
+            "numpy": np.__version__,
+            "scipy": scipy.__version__,
+            "oxygenlab": __version__,
+        },
+    }
+    canonical = json.dumps(report["parameters"], sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    report["parameters_sha256"] = hashlib.sha256(canonical).hexdigest()
+    report["input_sha256"] = input_sha256
+    (output / "summary.json").write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+
+    with (output / "transient_profile.csv").open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.writer(handle, lineterminator="\n")
+        writer.writerow(["time_s", "core_oxygen_mol_m3", "surface_oxygen_mol_m3", "volume_mean_oxygen_mol_m3"])
+        for t, c, s, vm in zip(sol.time_s, sol.core_oxygen_history_mol_m3, sol.surface_oxygen_history_mol_m3, sol.volume_mean_history_mol_m3):
+            writer.writerow([f"{t:.4f}", f"{c:.6g}", f"{s:.6g}", f"{vm:.6g}"])
+
+    n_times = len(sol.time_s)
+    snapshot_indices = sorted(list(set([0, n_times // 4, n_times // 2, 3 * n_times // 4, n_times - 1])))
+    snap_headers = ["radius_um"] + [f"t_{sol.time_s[idx]:.1f}s" for idx in snapshot_indices] + ["steady_state"]
+    with (output / "radial_snapshots.csv").open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.writer(handle, lineterminator="\n")
+        writer.writerow(snap_headers)
+        for r_idx, r in enumerate(sol.radius_um):
+            row = [f"{r:.2f}"]
+            for t_idx in snapshot_indices:
+                row.append(f"{sol.concentration_history_mol_m3[t_idx, r_idx]:.6g}")
+            row.append(f"{sol.steady_solution.concentration_mol_m3[r_idx]:.6g}")
+            writer.writerow(row)
+
+    p = report["parameters"]
+    t_half_str = f"{report['time_to_half_steady_core_s']:.2f} s" if report["time_to_half_steady_core_s"] is not None else "N/A"
+    t_95_str = f"{report['time_to_95pct_steady_core_s']:.2f} s" if report["time_to_95pct_steady_core_s"] is not None else "N/A"
+    lines = [
+        "# Spherical Transient Oxygen Diffusion Model", "",
+        "Illustrative time-dependent numerical simulation of oxygen ramp-up from anoxic initial conditions.", "",
+        f"Radius: {p['radius_um']:g} µm. Total simulated time: {report['total_time_s']:g} s ({report['time_steps']} steps).",
+        f"Initial oxygen: {report['initial_oxygen_mol_m3']:g} mol/m³. Bulk oxygen: {p['bulk_oxygen_mol_m3']:g} mol/m³.", "",
+        "| Quantity | Value |", "|---|---:|",
+        f"| Diffusion time scale R²/D (s) | {report['diffusion_time_scale_s']:.2f} |",
+        f"| Initial core oxygen (mol/m³) | {report['initial_core_oxygen_mol_m3']:.6g} |",
+        f"| Final core oxygen at {report['total_time_s']}s (mol/m³) | {report['final_core_oxygen_mol_m3']:.6g} |",
+        f"| Steady-state core oxygen (mol/m³) | {report['steady_core_oxygen_mol_m3']:.6g} |",
+        f"| Difference vs steady state (mol/m³) | {report['final_vs_steady_core_error_mol_m3']:.4e} |",
+        f"| Time to 50% steady-state core | {t_half_str} |",
+        f"| Time to 95% steady-state core | {t_95_str} |",
+        f"| Final surface oxygen (mol/m³) | {report['final_surface_oxygen_mol_m3']:.6g} |",
+        f"| Final volume-mean oxygen (mol/m³) | {report['final_volume_mean_oxygen_mol_m3']:.6g} |",
+        f"| Final below-threshold fraction | {report['final_fraction_below_threshold']:.4f} |", "",
+        "## Interpretation", "", *[f"- {item}" for item in report["interpretation"]], "",
+    ]
+
+    if plot:
+        try:
+            import matplotlib
+            matplotlib.use("Agg")
+            import matplotlib.pyplot as plt
+            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.5))
+            ax1.plot(sol.time_s, sol.core_oxygen_history_mol_m3, label="Sampled Core", color="#e11d48", lw=2)
+            ax1.plot(sol.time_s, sol.volume_mean_history_mol_m3, label="Volume Mean", color="#2563eb", lw=1.5, ls="--")
+            ax1.plot(sol.time_s, sol.surface_oxygen_history_mol_m3, label="Surface", color="#059669", lw=1.5)
+            ax1.axhline(report["steady_core_oxygen_mol_m3"], color="#64748b", ls=":", label="Steady Core")
+            ax1.set(xlabel="Time (s)", ylabel="Oxygen (mol/m³)", title="Oxygen Ramp-Up from Anoxia")
+            ax1.grid(alpha=0.3)
+            ax1.legend()
+
+            for idx in snapshot_indices:
+                ax2.plot(sol.radius_um, sol.concentration_history_mol_m3[idx], label=f"t = {sol.time_s[idx]:.0f} s")
+            ax2.plot(sol.radius_um, sol.steady_solution.concentration_mol_m3, "k--", label="Steady State", lw=1.8)
+            ax2.set(xlabel="Radius (µm)", ylabel="Oxygen (mol/m³)", title="Radial Profiles over Time")
+            ax2.grid(alpha=0.3)
+            ax2.legend()
+
+            fig.tight_layout()
+            try:
+                fig.savefig(output / "transient_ramp.png", dpi=160)
+            finally:
+                plt.close(fig)
+            lines += ["![Illustrative transient oxygen ramp](transient_ramp.png)", ""]
+        except Exception:
+            pass
+
+    (output / "REPORT.md").write_text("\n".join(lines), encoding="utf-8")
+    return report
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Conservative spherical oxygen transport model")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -319,6 +415,13 @@ def main(argv=None):
     transfer = commands.add_parser("sweep-transfer", help="illustrative surface-transfer sweep (m/s)")
     transfer.add_argument("--out", required=True)
     transfer.add_argument("--plot", action="store_true")
+    trans = commands.add_parser("transient", help="transient PDE simulation of oxygen ramp-up from anoxic initial conditions")
+    trans.add_argument("config", nargs="?", default=None, help="optional path to JSON parameter configuration")
+    trans.add_argument("--out", required=True, help="output directory for transient report")
+    trans.add_argument("--total-time-s", type=float, default=1200.0, help="total simulation time in seconds (default: 1200)")
+    trans.add_argument("--time-steps", type=int, default=120, help="number of time steps (default: 120)")
+    trans.add_argument("--initial-oxygen", type=float, default=0.0, help="initial uniform oxygen in mol/m3 (default: 0.0, anoxic)")
+    trans.add_argument("--plot", action="store_true", help="generate transient ramp plot")
     args = parser.parse_args(argv)
     try:
         if args.command == "demo":
@@ -327,6 +430,17 @@ def main(argv=None):
             report = sweep_vmax(args.out)
         elif args.command == "sweep-transfer":
             report = sweep_transfer(args.out, plot=args.plot)
+        elif args.command == "transient":
+            if args.config:
+                config = Path(args.config)
+                p = Parameters.from_json(config)
+                sha = hashlib.sha256(config.read_bytes()).hexdigest()
+            else:
+                p = Parameters()
+                sha = None
+            sol = solve_transient(p, total_time_s=args.total_time_s, time_steps=args.time_steps,
+                                  initial_oxygen_mol_m3=args.initial_oxygen)
+            report = save_transient(sol, args.out, input_sha256=sha, plot=args.plot)
         else:
             config = Path(args.config)
             report = save(solve(Parameters.from_json(config)), args.out, input_sha256=hashlib.sha256(config.read_bytes()).hexdigest())
@@ -338,3 +452,4 @@ def main(argv=None):
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

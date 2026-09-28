@@ -110,6 +110,38 @@ class OxygenTests(unittest.TestCase):
             config.write_text('{"radius_microns_typo":100}')
             with self.assertRaises(ValueError): Parameters.from_json(config)
 
+    def test_transient_ramp_up_converges_to_steady(self):
+        from oxygenlab.model import solve_transient
+        p = Parameters(radius_um=150, shells=40)
+        steady = solve(p)
+        # 150 um sphere has tau_diff = (1.5e-4)^2 / 2e-9 = 11.25 s
+        # In 120 s (10+ time constants), it reaches steady state
+        sol = solve_transient(p, total_time_s=120.0, time_steps=40, initial_oxygen_mol_m3=0.0)
+        self.assertEqual(len(sol.time_s), 40)
+        self.assertEqual(sol.concentration_history_mol_m3.shape, (40, 40))
+        self.assertEqual(sol.core_oxygen_history_mol_m3[0], 0.0)
+        # Monotonically increasing core oxygen during ramp up from anoxia
+        self.assertTrue(np.all(np.diff(sol.core_oxygen_history_mol_m3) >= -1e-12))
+        # Long-time final profile converges to steady-state solution
+        final_profile = sol.concentration_history_mol_m3[-1]
+        np.testing.assert_allclose(final_profile, steady.concentration_mol_m3, atol=1e-4)
+        self.assertIsNotNone(sol.summary["time_to_half_steady_core_s"])
+        self.assertIsNotNone(sol.summary["time_to_95pct_steady_core_s"])
+        self.assertLess(sol.summary["time_to_half_steady_core_s"], sol.summary["time_to_95pct_steady_core_s"])
+
+    def test_transient_parameter_validation(self):
+        from oxygenlab.model import solve_transient
+        p = Parameters()
+        with self.assertRaises(ValueError):
+            solve_transient(p, total_time_s=0)
+        with self.assertRaises(ValueError):
+            solve_transient(p, total_time_s=float("nan"))
+        with self.assertRaises(ValueError):
+            solve_transient(p, time_steps=1)
+        with self.assertRaises(ValueError):
+            solve_transient(p, initial_oxygen_mol_m3=-0.01)
+
 
 if __name__ == "__main__":
     unittest.main()
+

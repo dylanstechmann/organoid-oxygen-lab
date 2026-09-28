@@ -36,8 +36,18 @@ python -m unittest discover -s tests -v
 oxygenlab demo --out artifacts/demo --plot
 oxygenlab sweep-vmax --out artifacts/vmax
 oxygenlab sweep-transfer --out artifacts/transfer --plot
+oxygenlab transient --out artifacts/transient --total-time-s 1200 --time-steps 120 --plot
 oxygenlab solve examples/demo/parameters.json --out artifacts/sphere
 ```
+
+### Time-Dependent Transient Solver (PDE in r, t)
+
+`oxygenlab transient --out <dir>` simulates oxygen diffusion and consumption over time $\frac{\partial c}{\partial t} = \frac{D}{r^2}\frac{\partial}{\partial r}\left(r^2\frac{\partial c}{\partial r}\right) - R(c)$, starting from an anoxic initial condition ($c(r, 0) = 0$ by default).
+
+- Computes time-resolved core, surface, and volume-mean oxygen profiles.
+- Tracks penetration metrics: characteristic diffusion time $R^2/D$, time to 50% steady-state core oxygen, and time to 95% steady-state core oxygen.
+- Verifies dynamic convergence toward the steady-state solution $c_{\text{steady}}(r)$.
+- Outputs `transient_profile.csv`, `radial_snapshots.csv`, `summary.json`, and `REPORT.md`.
 
 Use `pip install -e .` and omit `--plot` for a smaller installation. Every
 output directory must be new. `profile.csv` gives radial concentrations and
