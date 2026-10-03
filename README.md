@@ -45,7 +45,7 @@ oxygenlab solve examples/demo/parameters.json --out artifacts/sphere
 `oxygenlab transient --out <dir>` simulates oxygen diffusion and consumption over time $\frac{\partial c}{\partial t} = \frac{D}{r^2}\frac{\partial}{\partial r}\left(r^2\frac{\partial c}{\partial r}\right) - R(c)$, starting from an anoxic initial condition ($c(r, 0) = 0$ by default).
 
 - Computes time-resolved core, surface, and volume-mean oxygen profiles.
-- Tracks penetration metrics: characteristic diffusion time $R^2/D$, time to 50% steady-state core oxygen, and time to 95% steady-state core oxygen.
+- Tracks transient metrics: characteristic diffusion time $R^2/D$, and the first 50%/95% steady-state core threshold crossings. Crossing direction follows whether the initial core is below or above steady state; these times are not restricted to an anoxic start.
 - Verifies dynamic convergence toward the steady-state solution $c_{\text{steady}}(r)$.
 - Outputs `transient_profile.csv`, `radial_snapshots.csv`, `summary.json`, and `REPORT.md`.
 

@@ -8,6 +8,7 @@ resistance, not a simulation of a pump or its perfusion rate.
 
 from dataclasses import asdict, dataclass
 import json
+import math
 from pathlib import Path
 
 import numpy as np
@@ -326,12 +327,17 @@ def solve_transient(
     t_half = None
     t_95 = None
     if steady_core > 1e-9:
-        half_mask = core_history >= 0.5 * steady_core
-        if np.any(half_mask):
-            t_half = float(time_s[np.argmax(half_mask)])
-        pct95_mask = core_history >= 0.95 * steady_core
-        if np.any(pct95_mask):
-            t_95 = float(time_s[np.argmax(pct95_mask)])
+        initial_core = float(core_history[0])
+
+        def first_threshold_crossing(target):
+            if math.isclose(initial_core, target, rel_tol=1e-12, abs_tol=1e-12):
+                return 0.0
+            crossed = core_history >= target if initial_core < target else core_history <= target
+            indices = np.flatnonzero(crossed)
+            return float(time_s[indices[0]]) if indices.size else None
+
+        t_half = first_threshold_crossing(0.5 * steady_core)
+        t_95 = first_threshold_crossing(0.95 * steady_core)
 
     summary = {
         "parameters": asdict(p),
@@ -357,7 +363,7 @@ def solve_transient(
             "Transient PDE mode solving del(c)/del(t) = D nabla^2(c) - R(c) from initial concentration.",
             "Illustrative numerical model; parameters need experimental calibration.",
             "Core oxygen is tracked at innermost shell center, surface at r=R with Robin/Dirichlet boundary.",
-            "Time to 50% and 95% of steady-state core oxygen indicate penetration time from anoxia.",
+            "Times to 50% and 95% of steady-state core oxygen are first threshold crossings; the crossing direction follows whether the initial core is below or above steady state.",
             "Spherical, homogeneous organoid model with fixed bath oxygen; no vascularization or cell death."
         ]
     }
