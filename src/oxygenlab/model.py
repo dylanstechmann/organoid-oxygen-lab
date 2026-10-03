@@ -214,6 +214,12 @@ def solve_transient(
         raise ValueError("time_steps must be an integer between 2 and 50000")
     if isinstance(initial_oxygen_mol_m3, bool) or not isinstance(initial_oxygen_mol_m3, (int, float)) or not np.isfinite(initial_oxygen_mol_m3) or initial_oxygen_mol_m3 < 0:
         raise ValueError("initial_oxygen_mol_m3 must be a nonnegative finite number")
+    if initial_oxygen_mol_m3 > p.bulk_oxygen_mol_m3:
+        raise ValueError("initial oxygen cannot exceed the fixed bath concentration in this model")
+    if isinstance(tolerance, bool) or not isinstance(tolerance, (int, float)) or not np.isfinite(tolerance) or not 0 < tolerance < 1:
+        raise ValueError("tolerance must be positive, finite, and less than 1")
+    if isinstance(max_iterations, bool) or not isinstance(max_iterations, int) or max_iterations < 1:
+        raise ValueError("max_iterations must be a positive integer")
 
     steady = solve(p)
     x, volumes, conductance, banded, boundary, boundary_g, da = _system(p)
@@ -225,16 +231,20 @@ def solve_transient(
     tau = time_s / t_scale
 
     u_history = np.zeros((time_steps, p.shells))
-    u_init = min(1.0, float(initial_oxygen_mol_m3) / p.bulk_oxygen_mol_m3)
+    u_init = float(initial_oxygen_mol_m3) / p.bulk_oxygen_mol_m3
     u_history[0] = u_init
 
     u_cur = np.full(p.shells, u_init)
+    step_residuals = []
+    max_step_iterations = 0
+    max_mass_balance_error = 0.0
     for step in range(1, time_steps):
         dtau = float(tau[step] - tau[step - 1])
         if dtau <= 0:
             continue
         u_old = np.copy(u_cur)
-        for it in range(max_iterations):
+        converged = False
+        for it in range(1, max_iterations + 1):
             flux = conductance * (u_cur[1:] - u_cur[:-1])
             diff = np.zeros_like(u_cur)
             diff[:-1] -= flux
@@ -243,6 +253,8 @@ def solve_transient(
 
             rate = np.ones_like(u_cur) if p.kinetics == "zero_order" else u_cur / (km + u_cur)
             f = volumes * (u_cur - u_old) / dtau + diff + da * volumes * rate
+            scale = max(1.0, da, 1.0 / dtau)
+            residual_norm = float(np.max(np.abs(f) / volumes) / scale)
 
             jac = banded.copy()
             jac[1] += volumes / dtau
@@ -250,10 +262,45 @@ def solve_transient(
                 jac[1] += da * volumes * km / (km + u_cur) ** 2
 
             step_delta = solve_banded((1, 1), jac, -f)
-            u_cur += step_delta
-            u_cur = np.maximum(u_cur, 0.0)
-            if np.max(np.abs(step_delta)) < tolerance:
+            if not np.isfinite(step_delta).all():
+                raise RuntimeError(f"transient solver produced a non-finite step at time index {step}")
+            alpha = 1.0
+            if np.any(step_delta < 0):
+                alpha = min(alpha, 0.99 * float(np.min(-u_cur[step_delta < 0] / step_delta[step_delta < 0])))
+            accepted = False
+            for _ in range(50):
+                candidate = u_cur + alpha * step_delta
+                if np.all(candidate >= 0) and np.all(candidate <= 1) and np.isfinite(candidate).all():
+                    candidate_flux = conductance * (candidate[1:] - candidate[:-1])
+                    candidate_diff = np.zeros_like(candidate)
+                    candidate_diff[:-1] -= candidate_flux
+                    candidate_diff[1:] += candidate_flux
+                    candidate_diff[-1] += boundary_g * (candidate[-1] - 1.0)
+                    candidate_rate = np.ones_like(candidate) if p.kinetics == "zero_order" else candidate / (km + candidate)
+                    candidate_f = volumes * (candidate - u_old) / dtau + candidate_diff + da * volumes * candidate_rate
+                    candidate_norm = float(np.max(np.abs(candidate_f) / volumes) / scale)
+                    if candidate_norm < residual_norm or candidate_norm <= tolerance:
+                        accepted = True
+                        break
+                alpha *= 0.5
+            if not accepted:
+                raise RuntimeError(f"transient solver line search failed at time index {step}")
+            u_cur = candidate
+            if candidate_norm <= tolerance and np.max(np.abs(alpha * step_delta)) <= max(tolerance, np.sqrt(tolerance)):
+                residual_norm = candidate_norm
+                converged = True
+                max_step_iterations = max(max_step_iterations, it)
                 break
+        if not converged:
+            raise RuntimeError(f"transient solver did not converge at time index {step} after {max_iterations} iterations")
+        step_residuals.append(residual_norm)
+        old_mass = float(np.sum(volumes * u_old))
+        new_mass = float(np.sum(volumes * u_cur))
+        surface_supply = dtau * boundary_g * (1.0 - u_cur[-1])
+        total_uptake = dtau * da * float(np.sum(volumes * (np.ones_like(u_cur) if p.kinetics == "zero_order" else u_cur / (km + u_cur))))
+        balance_error = abs((new_mass - old_mass) - (surface_supply - total_uptake))
+        balance_scale = max(abs(new_mass - old_mass), abs(surface_supply), abs(total_uptake), 1e-30)
+        max_mass_balance_error = max(max_mass_balance_error, balance_error / balance_scale)
         u_history[step] = u_cur
 
     concentrations = u_history * p.bulk_oxygen_mol_m3
@@ -296,6 +343,9 @@ def solve_transient(
         "final_core_oxygen_mol_m3": float(core_history[-1]),
         "steady_core_oxygen_mol_m3": steady_core,
         "final_vs_steady_core_error_mol_m3": float(abs(core_history[-1] - steady_core)),
+        "max_step_iterations": int(max_step_iterations),
+        "max_scaled_step_residual": float(max(step_residuals, default=0.0)),
+        "max_relative_transient_mass_balance_error": float(max_mass_balance_error),
         "time_to_half_steady_core_s": t_half,
         "time_to_95pct_steady_core_s": t_95,
         "final_surface_oxygen_mol_m3": float(surface_history[-1]),
@@ -323,4 +373,3 @@ def solve_transient(
         steady_solution=steady,
         summary=summary,
     )
-

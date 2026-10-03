@@ -128,6 +128,30 @@ class OxygenTests(unittest.TestCase):
         self.assertIsNotNone(sol.summary["time_to_half_steady_core_s"])
         self.assertIsNotNone(sol.summary["time_to_95pct_steady_core_s"])
         self.assertLess(sol.summary["time_to_half_steady_core_s"], sol.summary["time_to_95pct_steady_core_s"])
+        self.assertLess(sol.summary["max_scaled_step_residual"], 1e-8)
+        self.assertLess(sol.summary["max_relative_transient_mass_balance_error"], 1e-7)
+
+    def test_transient_rejects_unconverged_controls_and_unmodeled_initial_state(self):
+        from oxygenlab.model import solve_transient
+        p = Parameters(radius_um=150, shells=40)
+        for kwargs in [
+            {"max_iterations": 0},
+            {"max_iterations": 1},
+            {"initial_oxygen_mol_m3": p.bulk_oxygen_mol_m3 + 0.01},
+            {"tolerance": float("nan")},
+        ]:
+            with self.subTest(kwargs=kwargs), self.assertRaises((ValueError, RuntimeError)):
+                solve_transient(p, total_time_s=120, time_steps=2, **kwargs)
+
+    def test_transient_timestep_refinement_is_reported_and_stable(self):
+        from oxygenlab.model import solve_transient
+        p = Parameters(radius_um=150, shells=40)
+        coarse = solve_transient(p, total_time_s=120, time_steps=21)
+        fine = solve_transient(p, total_time_s=120, time_steps=41)
+        self.assertAlmostEqual(coarse.summary["final_core_oxygen_mol_m3"],
+                               fine.summary["final_core_oxygen_mol_m3"], delta=2e-4)
+        self.assertLess(coarse.summary["max_relative_transient_mass_balance_error"], 1e-6)
+        self.assertLess(fine.summary["max_relative_transient_mass_balance_error"], 1e-6)
 
     def test_transient_parameter_validation(self):
         from oxygenlab.model import solve_transient
@@ -144,4 +168,3 @@ class OxygenTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
