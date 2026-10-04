@@ -45,7 +45,9 @@ oxygenlab solve examples/demo/parameters.json --out artifacts/sphere
 `oxygenlab transient --out <dir>` simulates oxygen diffusion and consumption over time $\frac{\partial c}{\partial t} = \frac{D}{r^2}\frac{\partial}{\partial r}\left(r^2\frac{\partial c}{\partial r}\right) - R(c)$, starting from an anoxic initial condition ($c(r, 0) = 0$ by default).
 
 - Computes time-resolved core, surface, and volume-mean oxygen profiles.
-- Tracks transient metrics: characteristic diffusion time $R^2/D$, and the first 50%/95% steady-state core threshold crossings. Crossing direction follows whether the initial core is below or above steady state; these times are not restricted to an anoxic start.
+- Tracks the characteristic diffusion time $R^2/D$ and the first sampled crossings of absolute 50%/95% steady-core concentration thresholds.
+- Also reports time to 50%/95% of the initial-to-steady core change, using targets `initial + fraction * (steady - initial)`. These describe both oxygen rise and relaxation from above steady state; interpolation uses the first bracketing saved time points. `null` means the target was not reached in the simulated interval.
+- Reports the maximum accepted time-step residual and dynamic mass-balance error. The implicit backward-Euler method is first order in time; refine time points and radial shells before interpreting exposure times.
 - Verifies dynamic convergence toward the steady-state solution $c_{\text{steady}}(r)$.
 - Outputs `transient_profile.csv`, `radial_snapshots.csv`, `summary.json`, and `REPORT.md`.
 
@@ -54,8 +56,12 @@ output directory must be new. `profile.csv` gives radial concentrations and
 shell volume fractions. `summary.json` records settings, convergence and
 conservation diagnostics, parameter/input hashes and software versions.
 
-Configuration and report text use UTF-8 on every platform. Reports are prepared
-in a temporary sibling directory before publication. Failed generation or
+Configuration and report text use UTF-8 on every platform. Parameters are parsed
+and hashed from one byte snapshot; duplicate JSON keys are rejected. A requested
+plot failure fails the report and leaves no incomplete output. `--time-steps`
+counts saved time points including the initial state, so there is one fewer
+implicit integration step. Reports are prepared in a temporary sibling directory
+before publication. Failed generation or
 publication removes the new report, and an existing output path is never reused.
 Publication reserves the destination exclusively and moves the prepared files;
 it is not an atomic directory swap or a guarantee against a process crash or
@@ -100,6 +106,7 @@ the analytic reference; settings that predict negative oxygen are rejected.
 - Constant uptake agrees with the independent closed-form solution for both
   surface conditions, with second-order mesh refinement in the smooth example.
 - Nonlinear profiles agree with an independent SciPy boundary-value solver.
+- Early zero-uptake transient profiles agree with the independent spherical sine-series solution; halving the time interval reduces the error by about a factor of two.
 - Positive, radially increasing concentrations and matching integrated
   surface influx/uptake across the included size scenarios.
 - Strict parameters, explicit units, volume-weighted summaries and source hashes.
@@ -112,8 +119,9 @@ set for cells.
 
 Use this as a transparent starting model for a narrow question: how sensitive
 is predicted oxygen availability to measured size, uptake or surface resistance?
-The model assumes a homogeneous sphere at steady state. It excludes irregular
-geometry, spatially varying cell density, vascularization, growth, necrotic
+The model assumes a homogeneous sphere with either steady conditions or a
+transient from recorded uniform initial oxygen, while the bath remains fixed.
+It excludes irregular geometry, spatially varying cell density, vascularization, growth, necrotic
 cores, other nutrients, explicit fluid flow and time-varying culture conditions.
 
 The mass-transfer coefficient is a boundary parameter. It does not specify a

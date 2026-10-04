@@ -48,7 +48,20 @@ class Parameters:
 
     @classmethod
     def from_json(cls, path):
-        values = json.loads(Path(path).read_text(encoding="utf-8"))
+        return cls.from_json_bytes(Path(path).read_bytes())
+
+    @classmethod
+    def from_json_bytes(cls, data):
+        """Parse one UTF-8 snapshot that can also be hashed by a caller."""
+        def unique_object(pairs):
+            result = {}
+            for key, value in pairs:
+                if key in result:
+                    raise ValueError(f"duplicate configuration key: {key}")
+                result[key] = value
+            return result
+
+        values = json.loads(data.decode("utf-8-sig"), object_pairs_hook=unique_object)
         if not isinstance(values, dict) or set(values) - set(cls.__dataclass_fields__):
             raise ValueError("configuration must be an object containing only recognized parameter names")
         return cls(**values).validate()
@@ -339,6 +352,27 @@ def solve_transient(
         t_half = first_threshold_crossing(0.5 * steady_core)
         t_95 = first_threshold_crossing(0.95 * steady_core)
 
+    initial_core = float(core_history[0])
+    core_change = steady_core - initial_core
+
+    def time_to_fraction_of_core_change(fraction):
+        # Unlike fractions of absolute steady oxygen, these targets also describe
+        # relaxation from above steady state. Interpolation resolves only the
+        # sampled time grid, not the PDE's discretization error.
+        if core_change == 0:
+            return 0.0
+        target = initial_core + fraction * core_change
+        crossed = core_history >= target if core_change > 0 else core_history <= target
+        indices = np.flatnonzero(crossed)
+        if not indices.size:
+            return None
+        index = int(indices[0])
+        if index == 0:
+            return 0.0
+        left, right = float(core_history[index - 1]), float(core_history[index])
+        weight = (target - left) / (right - left)
+        return float(time_s[index - 1] + weight * (time_s[index] - time_s[index - 1]))
+
     summary = {
         "parameters": asdict(p),
         "total_time_s": float(total_time_s),
@@ -354,6 +388,12 @@ def solve_transient(
         "max_relative_transient_mass_balance_error": float(max_mass_balance_error),
         "time_to_half_steady_core_s": t_half,
         "time_to_95pct_steady_core_s": t_95,
+        "time_to_50pct_initial_to_steady_core_change_s": time_to_fraction_of_core_change(0.5),
+        "time_to_95pct_initial_to_steady_core_change_s": time_to_fraction_of_core_change(0.95),
+        "core_change_targets_mol_m3": {
+            "50pct": initial_core + 0.5 * core_change,
+            "95pct": initial_core + 0.95 * core_change,
+        },
         "final_surface_oxygen_mol_m3": float(surface_history[-1]),
         "final_volume_mean_oxygen_mol_m3": float(volume_mean_history[-1]),
         "final_fraction_below_threshold": float(np.sum(3 * volumes[concentrations[-1] < p.threshold_mol_m3])),
@@ -363,7 +403,10 @@ def solve_transient(
             "Transient PDE mode solving del(c)/del(t) = D nabla^2(c) - R(c) from initial concentration.",
             "Illustrative numerical model; parameters need experimental calibration.",
             "Core oxygen is tracked at innermost shell center, surface at r=R with Robin/Dirichlet boundary.",
-            "Times to 50% and 95% of steady-state core oxygen are first threshold crossings; the crossing direction follows whether the initial core is below or above steady state.",
+            "Absolute steady-core threshold times are first sampled crossings of 0.5 or 0.95 times the steady concentration; they may be unreachable from above.",
+            "Initial-to-steady core-change times use targets c_initial + fraction*(c_steady-c_initial), interpolated between the first bracketing samples in the direction of that change; null means not reached during the simulated interval.",
+            "An initial core already equal to steady core has zero core-change time; this does not establish that the whole initial radial profile is steady.",
+            "Accepted steps meet the scaled backward-Euler residual; the reported conservation error compares accumulation with surface influx minus uptake. Refine both time and radial grids before interpreting exposure times.",
             "Spherical, homogeneous organoid model with fixed bath oxygen; no vascularization or cell death."
         ]
     }

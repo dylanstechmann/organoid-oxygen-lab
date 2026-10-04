@@ -10,8 +10,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from oxygenlab.cli import demo, main, save, sweep_transfer
-from oxygenlab.model import Parameters, solve
+from oxygenlab.cli import demo, main, save, save_transient, sweep_transfer
+from oxygenlab.model import Parameters, solve, solve_transient
 
 
 class ReportTests(unittest.TestCase):
@@ -194,6 +194,56 @@ class ReportTests(unittest.TestCase):
         self.assertTrue((self.output / "transfer_sweep.csv").is_file())
         with self.assertRaises(FileExistsError):
             sweep_transfer(self.output)
+
+    def test_config_hash_and_parameters_identify_one_snapshot_for_both_cli_modes(self):
+        read_bytes = Path.read_bytes
+        for command in ["solve", "transient"]:
+            with self.subTest(command=command):
+                config = self.root / f"{command}.json"
+                config.write_bytes(b'{"radius_um":100,"shells":20}')
+                snapshot = read_bytes(config)
+                reads = []
+
+                def replace_after_read(path):
+                    data = read_bytes(path)
+                    if path == config:
+                        reads.append(path)
+                        path.write_bytes(b'{"radius_um":200,"shells":20}')
+                    return data
+
+                output = self.root / command
+                args = [command, str(config), "--out", str(output)]
+                if command == "transient":
+                    args += ["--total-time-s", "60", "--time-steps", "20"]
+                with patch.object(Path, "read_bytes", replace_after_read), contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(main(args), 0)
+                report = json.loads((output / "summary.json").read_text(encoding="utf-8"))
+                self.assertEqual(reads, [config])
+                self.assertEqual(report["input_sha256"], hashlib.sha256(snapshot).hexdigest())
+                self.assertEqual(report["parameters"]["radius_um"], 100)
+
+    def test_transient_plot_failures_do_not_publish_success_or_leak_figures(self):
+        try:
+            import matplotlib
+        except ImportError:
+            self.skipTest("plot extra is not installed")
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        from matplotlib.figure import Figure
+
+        solution = solve_transient(Parameters(radius_um=100, shells=20), total_time_s=60, time_steps=20)
+        before = plt.get_fignums()
+        for failing_method in ["tight_layout", "savefig"]:
+            with self.subTest(method=failing_method):
+                with patch.object(Figure, failing_method, side_effect=OSError("injected transient plot failure")):
+                    with self.assertRaisesRegex(OSError, "injected transient plot failure"):
+                        save_transient(solution, self.output, plot=True)
+                self.assertEqual(plt.get_fignums(), before)
+                self.assert_no_report_or_staging()
+        save_transient(solution, self.output, plot=True)
+        self.assertTrue((self.output / "transient_ramp.png").is_file())
+        self.assertIn("initial-to-steady core change", (self.output / "REPORT.md").read_text(encoding="utf-8"))
+        self.assertEqual(plt.get_fignums(), before)
 
     def test_cli_transient_report_and_preserves_existing_output(self):
         transient_out = self.root / "transient-out"

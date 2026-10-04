@@ -65,3 +65,33 @@ comparison does not reuse the finite-volume equations.
 Relevant primary context: [Leedale et al. (2021)](https://doi.org/10.1371/journal.pone.0244070)
 and [McMurtrey (2016)](https://doi.org/10.1089/ten.tec.2015.0375).
 All equations and boundary assumptions implemented here are specified above.
+
+## Transient integration and exposure timing
+
+The same conservative shell fluxes are used in backward Euler:
+
+`v * (u_new - u_old) / delta_tau + A*u_new - b + Da*v*rate(u_new) = 0`.
+
+Here `tau = t*D/R^2`. Accepted nonlinear steps preserve nonnegative oxygen and
+meet a residual scaled by `max(1, Da, 1/delta_tau)`. The conservation diagnostic
+compares the change in integrated shell oxygen with the step-end surface influx
+minus uptake, integrated over the step. It is distinct from the distance to the
+steady profile. Backward Euler is first order in time; saved points include t=0.
+
+An independent no-uptake, fixed-surface reference follows by setting
+`w = x*(1-c/c_bulk)` for an initially anoxic sphere. Then `w_tau = w_xx`,
+`w(0,tau)=w(1,tau)=0` and `w(x,0)=x`. Separation of variables gives
+
+`c/c_bulk = 1 - sum_n [2*(-1)^(n+1)/(n*pi*x)] * sin(n*pi*x) * exp(-n^2*pi^2*tau)`.
+
+The regression test evaluates this series at positive shell midpoints at
+`tau=0.1`, before steady state, and checks first-order temporal refinement on
+a fixed fine radial mesh. It does not reuse finite-volume coefficients.
+
+Absolute fractions of steady-core concentration may be unreachable when the
+initial core is above steady. Separate core-change metrics use
+`target = c_initial + fraction*(c_steady-c_initial)` and interpolate the first
+bracketing time samples in the direction of this change. A target outside the
+simulated horizon is null. A zero core difference gives zero core-change time;
+this does not imply that the entire initial profile was steady. These are
+numerical exposure summaries, not cell-survival or biological-response times.

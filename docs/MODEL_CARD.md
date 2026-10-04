@@ -25,6 +25,9 @@ confidence interval or cell-survival percentage is reported.
 
 Numerical verification includes conservation, analytic convergence, positivity,
 monotonicity and comparison to an independent nonlinear boundary-value solver.
+Transient verification additionally compares early zero-uptake diffusion with
+an independent spherical series and checks first-order temporal refinement.
+Core-change timing is a numerical summary, not an assay response time.
 It establishes that the specified equations are being solved consistently in
 the tested cases. No biological measurements have been used for calibration
 or out-of-sample validation.
@@ -33,8 +36,9 @@ or out-of-sample validation.
 
 1. Spherical shape, homogeneous effective diffusivity and uniform maximal
    uptake density.
-2. Steady state, continuously maintained bath concentration and constant
-   boundary resistance.
+2. Either steady state or transient diffusion from recorded uniform initial
+   oxygen, with continuously maintained bath concentration and constant boundary
+   resistance.
 3. Michaelis–Menten uptake with no changes in metabolic state, proliferation,
    death, density, differentiation or stress feedback.
 4. No vascularization, perfused channels, necrotic core, convection inside
