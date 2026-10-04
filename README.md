@@ -145,3 +145,7 @@ These primary papers motivate the modeling questions. This package implements
 its own reduced spherical model and does not reproduce their complete
 experimental systems or claim their validation. MIT for original code and
 numerical examples. No source-paper code, data or figures are redistributed.
+
+## Measured profile source qualification
+
+See the [public-source audit and executable intake contract](docs/MEASURED_PROFILE_INTAKE.md). The 2026-10-04 audit acquired zero eligible raw datasets. Source-linked intake checks preserve hashes and reject unsupported measurement origins or split-source replicates; they do not establish hardware or biological validation.

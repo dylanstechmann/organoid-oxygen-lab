@@ -57,3 +57,7 @@ identify the surface mass-transfer coefficient.
 Keep private measurements outside Git. Record a source hash and data license
 for any future calibration dataset. Generated outputs retain the complete
 parameter object, its canonical SHA-256, software versions and solver checks.
+
+## Public measurement source qualification (2026-10-04)
+
+[The bounded source audit](MEASURED_PROFILE_INTAKE.md) acquired no eligible raw complete-sphere profile cohort. `oxygenlab qualify-profiles` checks source bytes, explicit dissolved-concentration units and independent held-out biological identities for future comparison. It fits no parameters and changes no biological validation claim.

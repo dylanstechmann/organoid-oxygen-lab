@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "kind": "author-supplement-file-inventory-not-raw-measurement-data",
+  "audit_date": "2026-10-04",
+  "attribution": "Murphy et al. (2017), doi:10.1098/rsif.2016.0851; Sheth and Gratzl (2019), doi:10.1098/rspa.2018.0647",
+  "records": [
+    {
+      "id": 4591651,
+      "metadata_url": "https://api.figshare.com/v2/articles/4591651",
+      "metadata_sha256": "be57bdee9d7796402a203fdce168ef070bce8501d872a9dacd0f9bf7ce4c8fac",
+      "license": {
+        "value": 1,
+        "name": "CC BY 4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "files": [
+        {
+          "id": 7432171,
+          "name": "rsif20160851_si_001.pdf",
+          "size": 63078,
+          "is_link_only": false,
+          "download_url": "https://ndownloader.figshare.com/files/7432171",
+          "supplied_md5": "661618de6c7470956e5ecc2cc020e1be",
+          "computed_md5": "661618de6c7470956e5ecc2cc020e1be",
+          "mimetype": "application/pdf"
+        }
+      ],
+      "url_public_html": "https://rs.figshare.com/articles/journal_contribution/Supplementary_Figure_S1_Glucose_uptake_is_dependent_upon_spheroid_size_from_Measurement_of_oxygen_tension_within_mesenchymal_stem_cell_spheroids/4591651"
+    },
+    {
+      "id": 4591648,
+      "metadata_url": "https://api.figshare.com/v2/articles/4591648",
+      "metadata_sha256": "589eedbb30e64116268366ba7e489821cf2981ccb0f8b1ed337df507f804fa50",
+      "license": {
+        "value": 1,
+        "name": "CC BY 4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "files": [
+        {
+          "id": 7432168,
+          "name": "rsif20160851_si_002.pdf",
+          "size": 14569244,
+          "is_link_only": false,
+          "download_url": "https://ndownloader.figshare.com/files/7432168",
+          "supplied_md5": "07b4896fefd1d1d372c11c2518ff81e4",
+          "computed_md5": "07b4896fefd1d1d372c11c2518ff81e4",
+          "mimetype": "application/pdf"
+        }
+      ],
+      "url_public_html": "https://rs.figshare.com/articles/journal_contribution/Supplementary_Figure_S2_Large_spheroids_exhibit_a_hypoxic_core_from_Measurement_of_oxygen_tension_within_mesenchymal_stem_cell_spheroids/4591648"
+    },
+    {
+      "id": 4591642,
+      "metadata_url": "https://api.figshare.com/v2/articles/4591642",
+      "metadata_sha256": "f35f46988ad7f194202bcd4bed076a967ac1cbac671f62de427f2c2f0c7d458d",
+      "license": {
+        "value": 1,
+        "name": "CC BY 4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "files": [
+        {
+          "id": 7432162,
+          "name": "rsif20160851_si_003.pdf",
+          "size": 16406715,
+          "is_link_only": false,
+          "download_url": "https://ndownloader.figshare.com/files/7432162",
+          "supplied_md5": "53914f6a73208d3a21ae89c260341ed1",
+          "computed_md5": "53914f6a73208d3a21ae89c260341ed1",
+          "mimetype": "application/pdf"
+        }
+      ],
+      "url_public_html": "https://rs.figshare.com/articles/journal_contribution/Supplementary_Figure_S3_Apoptosis_correlates_with_hypoxic_cores_in_larger_spheroids_from_Measurement_of_oxygen_tension_within_mesenchymal_stem_cell_spheroids/4591642"
+    },
+    {
+      "id": 8153276,
+      "metadata_url": "https://api.figshare.com/v2/articles/8153276",
+      "metadata_sha256": "43b95e48fc195487ac44c91b7b6afcbfc4d880f27e40f8ad01ca3c85a61a8b65",
+      "license": {
+        "value": 1,
+        "name": "CC BY 4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "files": [
+        {
+          "id": 15200057,
+          "name": "rspa20180647_si_001.zip",
+          "size": 1127487,
+          "is_link_only": false,
+          "download_url": "https://ndownloader.figshare.com/files/15200057",
+          "supplied_md5": "c6b45ebf0508bd0c4b2f547e46420db8",
+          "computed_md5": "c6b45ebf0508bd0c4b2f547e46420db8",
+          "mimetype": "application/zip"
+        }
+      ],
+      "url_public_html": "https://rs.figshare.com/articles/dataset/mansucript_files_zipped_zip_from_Electrochemical_mapping_of_oxygenation_in_the_three-dimensional_multicellular_tumour_hemi-spheroid/8153276",
+      "download_sha256": "e616d985f5e71d693d57ca1ccf9a54cae3d5b43af04d4273d52cc661a84f3d5c",
+      "archive_members": [
+        "manuscript electrochemical mapping 2nd revision technical submission to zip.docx",
+        "figure captions technical submission.docx",
+        "Fig 1 approach revised technical submission.pptx",
+        "Fig 2 electrode array revised technical submission.pptx",
+        "Fig 3 time course revised technical submission.pptx",
+        "Fig 4 O2 maps revised technical submission.pptx"
+      ]
+    }
+  ],
+  "embedded_data_inventory": [
+    {
+      "file": "Fig 1 approach revised technical submission.pptx",
+      "embedded_data_members": []
+    },
+    {
+      "file": "Fig 2 electrode array revised technical submission.pptx",
+      "embedded_data_members": []
+    },
+    {
+      "file": "Fig 3 time course revised technical submission.pptx",
+      "embedded_data_members": []
+    },
+    {
+      "file": "Fig 4 O2 maps revised technical submission.pptx",
+      "embedded_data_members": []
+    }
+  ],
+  "n_eligible_raw_measurement_cohorts": 0
+}

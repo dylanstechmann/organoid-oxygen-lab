@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "kind": "source-page-access-probe-not-measurement-data",
+  "catalog_sha256": "078e001d6568da0802962889891c47b55b483a039c602045a88f22d9103dfa04",
+  "probes": [
+    {
+      "id": "murphy2017-msc",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5332570/",
+      "measurement_data_acquired": false,
+      "http_status": 200,
+      "final_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5332570/",
+      "content_type": "text/html; charset=utf-8",
+      "snapshot_sha256": "8ed5c8d63900542b81f0a4c0e882a84460a4399ed1b13030764763b9191bdad8",
+      "snapshot_bytes": 219925,
+      "snapshot_file": "murphy2017-msc.snapshot"
+    },
+    {
+      "id": "sheth2019-hemisphere",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6545061/",
+      "measurement_data_acquired": false,
+      "http_status": 200,
+      "final_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6545061/",
+      "content_type": "text/html; charset=utf-8",
+      "snapshot_sha256": "b5e4508dee98e12d563f8e166f5ff3687b2fca401d0378714a2f759155b353f0",
+      "snapshot_bytes": 265976,
+      "snapshot_file": "sheth2019-hemisphere.snapshot"
+    }
+  ],
+  "limits": [
+    "Page hashes identify these snapshots only; dynamic HTML can change on a repeat fetch.",
+    "HTTP success can include a robot-check page and does not establish measurement-file availability.",
+    "The curated catalog records source eligibility; this script probes page access and hashes bytes only."
+  ],
+  "final_qualification_catalog_sha256": "e421226f34591c9d8aafcbcd64b9f59daadb9e8d14be36f2e35e638628afe515"
+}

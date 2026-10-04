@@ -409,6 +409,10 @@ def _write_transient(sol, output, *, input_sha256=None, plot=False):
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Conservative spherical oxygen transport model")
     commands = parser.add_subparsers(dest="command", required=True)
+    qualify = commands.add_parser("qualify-profiles", help="check source-linked measured profiles and held-out biological units; no fitting")
+    qualify.add_argument("csv")
+    qualify.add_argument("manifest")
+    qualify.add_argument("--out", required=True)
     d = commands.add_parser("demo", help="illustrative size sweep and analytic convergence checks")
     d.add_argument("--out", required=True); d.add_argument("--plot", action="store_true")
     s = commands.add_parser("solve", help="solve one JSON parameter configuration")
@@ -427,7 +431,17 @@ def main(argv=None):
     trans.add_argument("--plot", action="store_true", help="generate transient ramp plot")
     args = parser.parse_args(argv)
     try:
-        if args.command == "demo":
+        if args.command == "qualify-profiles":
+            from oxygenlab.measurement_intake import qualify_profiles
+            report = qualify_profiles(args.csv, args.manifest)
+            with _report_directory(args.out) as staged:
+                (staged / "qualification.json").write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+                lines = ["# Measured oxygen profile intake", "", report["status"], "",
+                         f"Source: {report['source_url']}. License: {report['license']}.",
+                         f"Declared specimens: {report['n_specimens']}; biological units: {report['n_biological_units']}.", "",
+                         "No parameter fitting or biological validation was performed.", "", *report["limits"], ""]
+                (staged / "REPORT.md").write_text("\n".join(lines), encoding="utf-8")
+        elif args.command == "demo":
             report = demo(args.out, plot=args.plot)
         elif args.command == "sweep-vmax":
             report = sweep_vmax(args.out)
