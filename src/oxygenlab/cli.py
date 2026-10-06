@@ -6,6 +6,7 @@ import csv
 from dataclasses import asdict, replace
 import hashlib
 import json
+import math
 from pathlib import Path
 import platform
 import shutil
@@ -307,6 +308,148 @@ def sweep_transfer(output, parameters=None, transfer_values_m_s=(2e-6, 5e-6, 1e-
     return {"rows": rows, "core_nondecreasing": monotone, "worst_relative_mass_balance_error": worst}
 
 
+def local_sensitivity(output, parameters=None, relative_step=0.02):
+    """Inspect local profile sensitivities and parameter collinearity; no fitting."""
+    parameters = Parameters() if parameters is None else parameters
+    parameters.validate()
+    if (isinstance(relative_step, bool) or not np.isfinite(relative_step)
+            or not 0 < relative_step <= 0.2):
+        raise ValueError("relative_step must be finite and in (0, 0.2]")
+    names_and_units = [
+        ("radius_um", "um"), ("vmax_mol_m3_s", "mol/(m3*s)"),
+        ("km_mol_m3", "mol/m3"),
+    ]
+    if parameters.transfer_m_s is not None:
+        names_and_units.append(("transfer_m_s", "m/s"))
+    base_profile = solve(parameters).concentration_mol_m3
+    sensitivity_columns = []
+    descriptors = []
+    for name, unit in names_and_units:
+        center = getattr(parameters, name)
+        if center <= 0:
+            raise ValueError(f"{name} must be positive for local log-sensitivity analysis")
+        lower = replace(parameters, **{name: center * (1 - relative_step)}).validate()
+        upper = replace(parameters, **{name: center * (1 + relative_step)}).validate()
+        lower_profile = solve(lower).concentration_mol_m3
+        upper_profile = solve(upper).concentration_mol_m3
+        column = (upper_profile - lower_profile) / (math.log(center * (1 + relative_step)) - math.log(center * (1 - relative_step)))
+        sensitivity_columns.append(column)
+        descriptors.append({"parameter": name, "unit": unit, "baseline": center,
+                            "local_profile_sensitivity_norm_mol_m3": float(np.linalg.norm(column))})
+    matrix = np.column_stack(sensitivity_columns)
+    norms = np.linalg.norm(matrix, axis=0)
+    normalized = matrix / np.maximum(norms, 1e-30)
+    cosine = normalized.T @ normalized
+    singular_values = np.linalg.svd(matrix, compute_uv=False)
+    rank = int(np.linalg.matrix_rank(matrix))
+    condition_number = float(singular_values[0] / singular_values[-1]) if rank == len(descriptors) else None
+    report = {
+        "schema_version": 1,
+        "analysis": "local finite-difference log-parameter sensitivity",
+        "parameters": asdict(parameters),
+        "relative_step": relative_step,
+        "radial_measurement_count": len(base_profile),
+        "parameter_sensitivities": descriptors,
+        "pairwise_sensitivity_cosine": {
+            descriptors[i]["parameter"]: {
+                descriptors[j]["parameter"]: float(cosine[i, j]) for j in range(len(descriptors))
+            } for i in range(len(descriptors))
+        },
+        "singular_values_mol_m3": [float(value) for value in singular_values],
+        "sensitivity_rank": rank,
+        "local_condition_number": condition_number,
+        "interpretation": (
+            "Nearly parallel sensitivity columns or a high condition number indicate local parameter tradeoffs for this profile and parameter set. "
+            "This is a numerical diagnostic, not a biological identifiability conclusion or measurement uncertainty estimate."
+        ),
+    }
+    with _report_directory(output) as staged:
+        (staged / "sensitivity.json").write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+        lines = ["# Local oxygen-profile sensitivity", "", "Illustrative numerical sensitivity; no measurements were fitted.", "",
+                 f"Relative parameter perturbation: {relative_step:g}.",
+                 f"Sensitivity matrix rank: {rank} of {len(descriptors)}; local condition number: {condition_number if condition_number is not None else 'rank deficient'}.", "",
+                 "| Parameter | Unit | Baseline | Profile sensitivity norm (mol/m³ per log change) |", "|---|---|---:|---:|"]
+        lines.extend(f"| {item['parameter']} | {item['unit']} | {item['baseline']:.6g} | {item['local_profile_sensitivity_norm_mol_m3']:.6g} |" for item in descriptors)
+        lines += ["", report["interpretation"], "", "Sensitivity depends on the chosen geometry, baseline parameters and sampled profile.", ""]
+        (staged / "REPORT.md").write_text("\n".join(lines), encoding="utf-8")
+    return report
+
+
+def constructed_inverse_demo(output, *, seed=0, measurement_sd_mol_m3=0.002):
+    """Fit two parameters to a deliberately constructed synthetic radial profile."""
+    from scipy.optimize import least_squares
+
+    if isinstance(seed, bool) or not isinstance(seed, int) or seed < 0:
+        raise ValueError("seed must be a nonnegative integer")
+    if (isinstance(measurement_sd_mol_m3, bool) or not np.isfinite(measurement_sd_mol_m3)
+            or measurement_sd_mol_m3 <= 0):
+        raise ValueError("measurement_sd_mol_m3 must be positive and finite")
+    truth = Parameters(shells=80)
+    truth_profile = solve(truth)
+    radii = np.linspace(truth.radius_um * 0.04, truth.radius_um * 0.96, 18)
+    exact_observations = np.interp(radii, truth_profile.radius_um, truth_profile.concentration_mol_m3)
+    rng = np.random.default_rng(seed)
+    observations = exact_observations + rng.normal(0.0, measurement_sd_mol_m3, size=len(radii))
+    start_vmax = truth.vmax_mol_m3_s * 0.65
+    start_transfer = truth.transfer_m_s * 2.2
+
+    def parameters_from_log(log_values):
+        return replace(truth, vmax_mol_m3_s=float(np.exp(log_values[0])),
+                       transfer_m_s=float(np.exp(log_values[1])))
+
+    def residual(log_values):
+        fitted_parameters = parameters_from_log(log_values)
+        fitted_profile = solve(fitted_parameters)
+        predicted = np.interp(radii, fitted_profile.radius_um, fitted_profile.concentration_mol_m3)
+        return (predicted - observations) / measurement_sd_mol_m3
+
+    fitted = least_squares(
+        residual,
+        np.log([start_vmax, start_transfer]),
+        bounds=(np.log([1e-5, 1e-7]), np.log([0.5, 1e-3])),
+        max_nfev=100,
+    )
+    estimated = parameters_from_log(fitted.x)
+    predicted = observations + residual(fitted.x) * measurement_sd_mol_m3
+    singular_values = np.linalg.svd(fitted.jac, compute_uv=False)
+    rank = int(np.linalg.matrix_rank(fitted.jac))
+    fit_report = {
+        "schema_version": 1,
+        "data_status": "constructed_synthetic_profile_only",
+        "synthetic_truth": {"vmax_mol_m3_s": truth.vmax_mol_m3_s, "transfer_m_s": truth.transfer_m_s},
+        "initial_guess": {"vmax_mol_m3_s": start_vmax, "transfer_m_s": start_transfer},
+        "estimate": {"vmax_mol_m3_s": estimated.vmax_mol_m3_s, "transfer_m_s": estimated.transfer_m_s},
+        "measurement_sd_mol_m3": measurement_sd_mol_m3,
+        "seed": seed,
+        "n_constructed_observations": len(radii),
+        "optimizer_success": bool(fitted.success),
+        "optimizer_message": str(fitted.message),
+        "weighted_residual_sum_squares": float(np.sum(fitted.fun ** 2)),
+        "jacobian_rank": rank,
+        "jacobian_singular_values": [float(value) for value in singular_values],
+        "jacobian_condition_number": float(singular_values[0] / singular_values[-1]) if rank == len(fitted.x) else None,
+        "limitations": [
+            "The observations are generated by this same model family from known illustrative parameters with added synthetic Gaussian noise.",
+            "This exercise validates no oxygen sensor, culture condition, organoid, biological rate, or transfer coefficient.",
+            "A small residual on constructed data is not evidence that the parameters would be identifiable from real measurements.",
+        ],
+    }
+    with _report_directory(output) as staged:
+        (staged / "inverse_demo.json").write_text(json.dumps(fit_report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+        with (staged / "constructed_profile.csv").open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.writer(handle, lineterminator="\n")
+            writer.writerow(["radius_um", "exact_synthetic_oxygen_mol_m3", "constructed_observation_mol_m3", "fit_mol_m3"])
+            writer.writerows(zip(radii, exact_observations, observations, predicted))
+        lines = ["# Constructed oxygen-profile inverse example", "", "**Synthetic illustration only. No biological measurements were fit.**", "",
+                 f"Known illustrative truth: Vmax={truth.vmax_mol_m3_s:g} mol/(m³·s), k={truth.transfer_m_s:g} m/s.",
+                 f"Fit: Vmax={estimated.vmax_mol_m3_s:.6g} mol/(m³·s), k={estimated.transfer_m_s:.6g} m/s.",
+                 f"Weighted residual sum of squares: {fit_report['weighted_residual_sum_squares']:.6g}; Jacobian condition number: {fit_report['jacobian_condition_number']}.", "",
+                 "The profile was simulated from the same equations being fit. This can reveal code and local tradeoffs, not establish real-parameter recovery.", "",
+                 *[f"- {item}" for item in fit_report["limitations"]], ""]
+        (staged / "REPORT.md").write_text("\n".join(lines), encoding="utf-8")
+    return fit_report
+
+
 def save_transient(transient_solution, output, *, input_sha256=None, plot=False):
     with _report_directory(output) as staged:
         return _write_transient(transient_solution, staged, input_sha256=input_sha256, plot=plot)
@@ -422,6 +565,14 @@ def main(argv=None):
     transfer = commands.add_parser("sweep-transfer", help="illustrative surface-transfer sweep (m/s)")
     transfer.add_argument("--out", required=True)
     transfer.add_argument("--plot", action="store_true")
+    sensitivity = commands.add_parser("sensitivity", help="inspect local profile sensitivities and parameter tradeoffs")
+    sensitivity.add_argument("--config", default=None, help="optional JSON parameter configuration")
+    sensitivity.add_argument("--relative-step", type=float, default=0.02)
+    sensitivity.add_argument("--out", required=True)
+    inverse = commands.add_parser("inverse-demo", help="fit a deliberately constructed synthetic profile; not biological calibration")
+    inverse.add_argument("--seed", type=int, default=0)
+    inverse.add_argument("--measurement-sd", type=float, default=0.002, help="constructed noise SD in mol/m3")
+    inverse.add_argument("--out", required=True)
     trans = commands.add_parser("transient", help="transient PDE simulation from uniform initial oxygen")
     trans.add_argument("config", nargs="?", default=None, help="optional path to JSON parameter configuration")
     trans.add_argument("--out", required=True, help="output directory for transient report")
@@ -447,6 +598,16 @@ def main(argv=None):
             report = sweep_vmax(args.out)
         elif args.command == "sweep-transfer":
             report = sweep_transfer(args.out, plot=args.plot)
+        elif args.command == "sensitivity":
+            if args.config:
+                config_bytes = Path(args.config).read_bytes()
+                parameters = Parameters.from_json_bytes(config_bytes)
+            else:
+                parameters = Parameters()
+            report = local_sensitivity(args.out, parameters, relative_step=args.relative_step)
+        elif args.command == "inverse-demo":
+            report = constructed_inverse_demo(args.out, seed=args.seed,
+                                               measurement_sd_mol_m3=args.measurement_sd)
         elif args.command == "transient":
             if args.config:
                 config_bytes = Path(args.config).read_bytes()
@@ -470,4 +631,3 @@ def main(argv=None):
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

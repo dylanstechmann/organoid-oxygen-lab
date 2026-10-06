@@ -27,7 +27,9 @@ Numerical verification includes conservation, analytic convergence, positivity,
 monotonicity and comparison to an independent nonlinear boundary-value solver.
 Transient verification additionally compares early zero-uptake diffusion with
 an independent spherical series and checks first-order temporal refinement.
-Core-change timing is a numerical summary, not an assay response time.
+Core-change timing is a numerical summary, not an assay response time. The
+`inverse-demo` workflow fits only an internally constructed synthetic profile
+from the same model family; it is not evidence of biological parameter recovery.
 It establishes that the specified equations are being solved consistently in
 the tested cases. No biological measurements have been used for calibration
 or out-of-sample validation.

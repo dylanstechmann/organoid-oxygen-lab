@@ -10,7 +10,17 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from oxygenlab.cli import demo, main, save, save_transient, sweep_transfer
+import numpy as np
+
+from oxygenlab.cli import (
+    constructed_inverse_demo,
+    demo,
+    local_sensitivity,
+    main,
+    save,
+    save_transient,
+    sweep_transfer,
+)
 from oxygenlab.model import Parameters, solve, solve_transient
 
 
@@ -195,6 +205,34 @@ class ReportTests(unittest.TestCase):
         with self.assertRaises(FileExistsError):
             sweep_transfer(self.output)
 
+    def test_local_sensitivity_reports_parameter_tradeoffs_without_measurement_claims(self):
+        report = local_sensitivity(self.output, Parameters(shells=40))
+        self.assertEqual(report["analysis"], "local finite-difference log-parameter sensitivity")
+        self.assertEqual(report["radial_measurement_count"], 40)
+        self.assertEqual({item["parameter"] for item in report["parameter_sensitivities"]},
+                         {"radius_um", "vmax_mol_m3_s", "km_mol_m3", "transfer_m_s"})
+        self.assertTrue(all(np.isfinite(item["local_profile_sensitivity_norm_mol_m3"])
+                            for item in report["parameter_sensitivities"]))
+        self.assertIn("not a biological identifiability conclusion",
+                      report["interpretation"])
+        self.assertTrue((self.output / "sensitivity.json").is_file())
+        self.assertIn("Illustrative numerical sensitivity",
+                      (self.output / "REPORT.md").read_text(encoding="utf-8"))
+
+    def test_constructed_inverse_demo_is_seeded_and_explicitly_synthetic(self):
+        first = constructed_inverse_demo(self.output, seed=9)
+        second_output = self.root / "inverse-repeat"
+        second = constructed_inverse_demo(second_output, seed=9)
+        self.assertEqual(first, second)
+        self.assertEqual(first["data_status"], "constructed_synthetic_profile_only")
+        self.assertEqual(first["n_constructed_observations"], 18)
+        self.assertTrue(first["optimizer_success"])
+        self.assertTrue(np.isfinite(first["weighted_residual_sum_squares"]))
+        self.assertTrue((self.output / "inverse_demo.json").is_file())
+        self.assertEqual(len((self.output / "constructed_profile.csv").read_text(encoding="utf-8").splitlines()), 19)
+        self.assertIn("No biological measurements were fit",
+                      (self.output / "REPORT.md").read_text(encoding="utf-8"))
+
     def test_config_hash_and_parameters_identify_one_snapshot_for_both_cli_modes(self):
         read_bytes = Path.read_bytes
         for command in ["solve", "transient"]:
@@ -267,4 +305,3 @@ class ReportTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

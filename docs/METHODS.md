@@ -95,3 +95,19 @@ bracketing time samples in the direction of this change. A target outside the
 simulated horizon is null. A zero core difference gives zero core-change time;
 this does not imply that the entire initial profile was steady. These are
 numerical exposure summaries, not cell-survival or biological-response times.
+
+## Local sensitivity and constructed inverse illustration
+
+`oxygenlab sensitivity` perturbs each positive parameter by a relative step in
+log space, solves the steady profile at both sides, and forms a centered
+finite-difference sensitivity matrix over radial locations. Column cosines and
+singular values reveal local tradeoffs at the chosen baseline. This profile
+geometry is not a proof of identifiability from measured sensors, and the
+diagnostic does not include measurement error or parameter priors.
+
+`oxygenlab inverse-demo` creates an exact profile from the illustrative default
+model, adds seeded synthetic Gaussian noise, then fits only Vmax and surface
+transfer while holding other settings fixed. The observations and fitted values
+are written with the report. Because generation and fitting use the same model
+family, this verifies software plumbing only; it cannot calibrate organoid
+oxygen uptake or a real device coefficient.
