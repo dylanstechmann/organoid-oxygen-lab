@@ -16,7 +16,13 @@ import numpy as np
 import scipy
 
 from oxygenlab import __version__
-from oxygenlab.model import Parameters, solve, solve_transient, zero_order_analytic
+from oxygenlab.model import (
+    Parameters,
+    critical_radius,
+    solve,
+    solve_transient,
+    zero_order_analytic,
+)
 
 
 @contextmanager
@@ -549,6 +555,40 @@ def _write_transient(sol, output, *, input_sha256=None, plot=False):
     return report
 
 
+def write_critical_radius(output, parameters=None, *, tolerance_um=0.01, max_radius_um=20000.0,
+                          shells=None, input_sha256=None):
+    """Publish the largest radius whose sampled core oxygen reaches the threshold."""
+    report = critical_radius(Parameters() if parameters is None else parameters,
+                             tolerance_um=tolerance_um, max_radius_um=max_radius_um, shells=shells)
+    report["input_sha256"] = input_sha256
+    report["software"] = {"oxygenlab": __version__}
+    with _report_directory(output) as staged:
+        (staged / "critical_radius.json").write_text(
+            json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+        radius = report["critical_radius_um"]
+        analytic = report["zero_order_analytic_radius_um"]
+        lines = [
+            "# Threshold-limited sphere size", "",
+            "Largest sphere whose sampled core oxygen stays at or above the reporting threshold, "
+            "for illustrative parameters.", "",
+            f"Reporting threshold: {report['threshold_mol_m3']:g} mol/m³. "
+            f"Kinetics: {report['parameters']['kinetics']}. "
+            f"Surface: {'fixed bath concentration' if report['parameters']['transfer_m_s'] is None else str(report['parameters']['transfer_m_s']) + ' m/s transfer'}.",
+            f"Status: {report['status']}.", "",
+            "| Quantity | Value |", "|---|---:|",
+            f"| Numerical critical radius (µm) | {'unavailable' if radius is None else format(radius, '.4g')} |",
+            f"| Closed-form zero-order radius (µm) | {'not applicable' if analytic is None else format(analytic, '.4g')} |",
+            f"| Search bracket (µm) | {report['bracket_um']} |",
+            f"| Bisection iterations | {report['bisection_iterations']} |",
+            f"| Sampled core at that radius (mol/m³) | {'unavailable' if report['sampled_core_at_critical_radius_mol_m3'] is None else format(report['sampled_core_at_critical_radius_mol_m3'], '.6g')} |",
+            f"| Radial shells used | {report['search_shells']} |", "",
+            "## Interpretation", "",
+            *[f"- {item}" for item in report["interpretation"]], "",
+        ]
+        (staged / "REPORT.md").write_text("\n".join(lines), encoding="utf-8")
+    return report
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Conservative spherical oxygen transport model")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -573,6 +613,14 @@ def main(argv=None):
     inverse.add_argument("--seed", type=int, default=0)
     inverse.add_argument("--measurement-sd", type=float, default=0.002, help="constructed noise SD in mol/m3")
     inverse.add_argument("--out", required=True)
+    crit = commands.add_parser(
+        "critical-radius",
+        help="largest sphere whose sampled core oxygen reaches the reporting threshold")
+    crit.add_argument("config", nargs="?", default=None, help="optional JSON parameter configuration")
+    crit.add_argument("--out", required=True)
+    crit.add_argument("--tolerance-um", type=float, default=0.01, help="bisection tolerance in micrometres")
+    crit.add_argument("--max-radius-um", type=float, default=20000.0, help="upper search bound in micrometres")
+    crit.add_argument("--shells", type=int, default=None, help="radial shells used during the search")
     trans = commands.add_parser("transient", help="transient PDE simulation from uniform initial oxygen")
     trans.add_argument("config", nargs="?", default=None, help="optional path to JSON parameter configuration")
     trans.add_argument("--out", required=True, help="output directory for transient report")
@@ -608,6 +656,16 @@ def main(argv=None):
         elif args.command == "inverse-demo":
             report = constructed_inverse_demo(args.out, seed=args.seed,
                                                measurement_sd_mol_m3=args.measurement_sd)
+        elif args.command == "critical-radius":
+            if args.config:
+                config_bytes = Path(args.config).read_bytes()
+                parameters = Parameters.from_json_bytes(config_bytes)
+                sha = hashlib.sha256(config_bytes).hexdigest()
+            else:
+                parameters, sha = Parameters(), None
+            report = write_critical_radius(args.out, parameters, tolerance_um=args.tolerance_um,
+                                           max_radius_um=args.max_radius_um, shells=args.shells,
+                                           input_sha256=sha)
         elif args.command == "transient":
             if args.config:
                 config_bytes = Path(args.config).read_bytes()

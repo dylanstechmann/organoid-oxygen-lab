@@ -46,9 +46,32 @@ oxygenlab sweep-vmax --out artifacts/vmax
 oxygenlab sweep-transfer --out artifacts/transfer --plot
 oxygenlab sensitivity --out artifacts/local-sensitivity
 oxygenlab inverse-demo --out artifacts/constructed-inverse --seed 4
+oxygenlab critical-radius --out artifacts/critical-radius
 oxygenlab transient --out artifacts/transient --total-time-s 1200 --time-steps 120 --plot
 oxygenlab solve examples/demo/parameters.json --out artifacts/sphere
 ```
+
+### Threshold-limited sphere size
+
+`oxygenlab critical-radius --out <dir>` reports the largest sphere whose sampled
+core oxygen stays at or above the reporting threshold. For zero-order uptake the
+balance is a quadratic in R with an exact root — `(vmax/6D)R² + (vmax/3k)R −
+(c_bulk − threshold) = 0`, with the linear term dropping out for a fixed surface
+concentration — and that closed form is published beside a bisection on the
+numerical solver as an independent check. Michaelis–Menten uptake has no closed
+form, so it is bisected; because MM uptake is at most `vmax`, its critical radius
+is always at least the zero-order value.
+
+The bisection works on the solver's minimum *sampled* concentration, which sits
+at the innermost shell center rather than exactly at r=0, so the result is the
+largest radius whose sampled core reaches the threshold; refine `--shells` to
+tighten that gap. Degenerate cases are named rather than guessed: zero uptake
+reports `unbounded_without_uptake`, a bath at or below the threshold reports
+`no_radius_qualifies_bath_at_or_below_threshold`, and a radius beyond
+`--max-radius-um` reports `exceeds_search_bound`. Radii the solver refuses are
+listed with their reasons. **The threshold is a user-selected reporting level, not
+a hypoxia, death, viability or potency cutoff, and the default parameters are
+illustrative rather than measured.**
 
 ### Time-Dependent Transient Solver (PDE in r, t)
 
@@ -115,6 +138,15 @@ the analytic reference; settings that predict negative oxygen are rejected.
 - Zero consumption recovers the bath concentration throughout the sphere.
 - Constant uptake agrees with the independent closed-form solution for both
   surface conditions, with second-order mesh refinement in the smooth example.
+- The threshold-limited radius from bisection agrees with the closed-form
+  zero-order root for both surface conditions, and the Michaelis–Menten radius
+  is never smaller than it.
+- Feasible zero-order configurations solve on fine meshes. An exact linear solve
+  carries backward error of order `eps·‖A‖`, which grows with refinement; judging
+  it by the Newton iteration's absolute tolerance previously rejected valid
+  configurations at roughly 1,000 shells and above (the default 160 was
+  unaffected). The linear branch now accepts a round-off floor and records the
+  tolerance it used in `summary.json`.
 - Nonlinear profiles agree with an independent SciPy boundary-value solver.
 - Early zero-uptake transient profiles agree with the independent spherical sine-series solution; halving the time interval reduces the error by about a factor of two.
 - Positive, radially increasing concentrations and matching integrated

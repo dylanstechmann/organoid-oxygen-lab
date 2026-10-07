@@ -8,7 +8,13 @@ import numpy as np
 from scipy.integrate import solve_bvp
 
 from oxygenlab.cli import save, transfer_sweep_rows, vmax_sweep_rows
-from oxygenlab.model import Parameters, solve, zero_order_analytic
+from oxygenlab.model import (
+    Parameters,
+    critical_radius,
+    solve,
+    zero_order_analytic,
+    zero_order_critical_radius,
+)
 
 
 class OxygenTests(unittest.TestCase):
@@ -168,3 +174,98 @@ class OxygenTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CriticalRadiusTests(unittest.TestCase):
+    """The threshold-limited radius is checked against an independent closed form."""
+
+    def test_closed_form_matches_bisection_for_both_surface_conditions(self):
+        for label, parameters in (
+            ("fixed surface", Parameters(kinetics="zero_order", transfer_m_s=None, shells=2000)),
+            ("finite transfer", Parameters(kinetics="zero_order", shells=2000)),
+        ):
+            with self.subTest(surface=label):
+                analytic = zero_order_critical_radius(parameters)
+                numeric = critical_radius(parameters, tolerance_um=0.005, shells=2000)
+                self.assertEqual(numeric["status"], "bracketed")
+                # The bisection brackets the closed-form root within its tolerance.
+                low, high = numeric["bracket_um"]
+                self.assertLessEqual(low, analytic)
+                self.assertLessEqual(analytic, high + 0.01)
+                self.assertAlmostEqual(numeric["critical_radius_um"], analytic, delta=0.02)
+
+    def test_closed_form_satisfies_the_balance_it_solves(self):
+        parameters = Parameters(kinetics="zero_order", shells=400)
+        radius_um = zero_order_critical_radius(parameters)
+        at_radius = replace(parameters, radius_um=radius_um)
+        # c(0) must equal the threshold at the critical radius, by construction.
+        self.assertAlmostEqual(float(zero_order_analytic(0.0, at_radius)),
+                               parameters.threshold_mol_m3, places=12)
+        # A slightly larger sphere must fall below it.
+        larger = replace(parameters, radius_um=radius_um * 1.01)
+        self.assertLess(float(zero_order_analytic(0.0, larger)), parameters.threshold_mol_m3)
+
+    def test_michaelis_menten_radius_is_at_least_the_zero_order_radius(self):
+        result = critical_radius(Parameters(shells=400), tolerance_um=0.05, shells=400)
+        self.assertEqual(result["status"], "bracketed")
+        self.assertGreaterEqual(result["critical_radius_um"], result["zero_order_analytic_radius_um"])
+        self.assertAlmostEqual(result["sampled_core_at_critical_radius_mol_m3"],
+                               Parameters().threshold_mol_m3, delta=5e-4)
+
+    def test_larger_uptake_shrinks_the_radius(self):
+        radii = [critical_radius(Parameters(vmax_mol_m3_s=vmax, shells=200),
+                                 tolerance_um=0.1, shells=200)["critical_radius_um"]
+                 for vmax in (0.01, 0.02, 0.04)]
+        self.assertTrue(radii[0] > radii[1] > radii[2], radii)
+
+    def test_degenerate_cases_are_named_rather_than_guessed(self):
+        self.assertEqual(critical_radius(Parameters(vmax_mol_m3_s=0.0))["status"],
+                         "unbounded_without_uptake")
+        self.assertIsNone(critical_radius(Parameters(vmax_mol_m3_s=0.0))["critical_radius_um"])
+        at_threshold = critical_radius(Parameters(threshold_mol_m3=0.2))
+        self.assertEqual(at_threshold["status"], "no_radius_qualifies_bath_at_or_below_threshold")
+        self.assertIsNone(at_threshold["critical_radius_um"])
+        self.assertIsNone(zero_order_critical_radius(Parameters(vmax_mol_m3_s=0.0)))
+        self.assertIsNone(zero_order_critical_radius(Parameters(threshold_mol_m3=0.2)))
+
+    def test_search_bound_is_reported_rather_than_extrapolated(self):
+        result = critical_radius(Parameters(vmax_mol_m3_s=1e-6, shells=64), max_radius_um=50.0)
+        self.assertEqual(result["status"], "exceeds_search_bound")
+        self.assertIsNone(result["critical_radius_um"])
+        self.assertIn("raise max_radius_um", " ".join(result["interpretation"]))
+
+    def test_invalid_search_settings_are_rejected(self):
+        for kwargs in ({"tolerance_um": 0}, {"tolerance_um": -1}, {"tolerance_um": float("nan")},
+                       {"max_radius_um": 0}, {"max_radius_um": -5}, {"tolerance_um": True}):
+            with self.subTest(**kwargs):
+                with self.assertRaises(ValueError):
+                    critical_radius(Parameters(), **kwargs)
+
+    def test_infeasible_probe_radii_are_recorded_with_reasons(self):
+        result = critical_radius(Parameters(kinetics="zero_order", shells=200),
+                                 tolerance_um=0.05, shells=200)
+        self.assertEqual(result["status"], "bracketed")
+        self.assertTrue(result["infeasible_searched_radii"])
+        for entry in result["infeasible_searched_radii"]:
+            self.assertGreater(entry["radius_um"], result["critical_radius_um"])
+            self.assertTrue(entry["reason"])
+
+    def test_fine_mesh_zero_order_solves_instead_of_failing_its_residual_gate(self):
+        # An exact linear solve carries backward error that grows with refinement.
+        # These feasible configurations were rejected before the acceptance floor.
+        for shells in (160, 2000, 5000):
+            for radius_um in (50, 100, 150):
+                with self.subTest(shells=shells, radius_um=radius_um):
+                    parameters = Parameters(kinetics="zero_order", shells=shells, radius_um=radius_um)
+                    summary = solve(parameters).summary
+                    self.assertAlmostEqual(summary["minimum_sampled_oxygen_mol_m3"],
+                                           float(zero_order_analytic(0.0, parameters)), places=9)
+                    self.assertLessEqual(summary["scaled_residual"],
+                                         summary["residual_acceptance_tolerance"])
+        # The nonlinear branch keeps the stricter tolerance.
+        nonlinear = solve(Parameters(shells=2000)).summary
+        self.assertEqual(nonlinear["residual_acceptance_tolerance"], 1e-8)
+
+    def test_negative_zero_order_oxygen_still_fails_closed(self):
+        with self.assertRaisesRegex(ValueError, "negative oxygen"):
+            solve(Parameters(kinetics="zero_order", radius_um=600, shells=200))

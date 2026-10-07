@@ -6,7 +6,7 @@ modeled. A finite surface mass-transfer coefficient represents a boundary
 resistance, not a simulation of a pump or its perfusion rate.
 """
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 import json
 import math
 from pathlib import Path
@@ -136,9 +136,18 @@ def solve(parameters=Parameters(), *, tolerance=1e-8, max_iterations=300):
 
     u = np.ones(p.shells)
     iterations = 0
+    # An exact linear solve still carries backward error of order eps*||A||, which grows
+    # with mesh refinement. Judging it by the Newton iteration's absolute tolerance
+    # rejected feasible fine-mesh configurations, so the linear branch accepts a
+    # round-off floor. The nonlinear branch keeps the stricter tolerance it enforces above.
+    accept_tolerance = tolerance
     if p.vmax_mol_m3_s == 0:
         pass
     elif p.kinetics == "zero_order":
+        accept_tolerance = max(
+            tolerance,
+            float(np.finfo(float).eps * np.max(np.abs(banded)) / np.min(volumes)) / max(1, da),
+        )
         u = solve_banded((1, 1), banded, boundary - da * volumes)
         iterations = 1
         if np.any(u < 0):
@@ -169,7 +178,7 @@ def solve(parameters=Parameters(), *, tolerance=1e-8, max_iterations=300):
                 raise RuntimeError("nonlinear line search failed; refine parameters or mesh")
         if norm(u) > tolerance:
             raise RuntimeError("nonlinear solver did not meet the requested residual tolerance")
-    if norm(u) > tolerance or not np.isfinite(u).all() or np.any(u > 1 + 1e-8):
+    if norm(u) > accept_tolerance or not np.isfinite(u).all() or np.any(u > 1 + 1e-8):
         raise RuntimeError("solution failed residual or physical-bound checks")
     radius = p.radius_um * 1e-6
     rate = np.ones_like(u) if p.kinetics == "zero_order" else u / (km + u)
@@ -178,6 +187,7 @@ def solve(parameters=Parameters(), *, tolerance=1e-8, max_iterations=300):
     surface = p.bulk_oxygen_mol_m3 if p.transfer_m_s is None else p.bulk_oxygen_mol_m3 - influx / (4 * np.pi * radius ** 2 * p.transfer_m_s)
     concentrations = u * p.bulk_oxygen_mol_m3
     summary = {"parameters": asdict(p), "iterations": iterations, "scaled_residual": norm(u),
+        "residual_acceptance_tolerance": float(accept_tolerance),
         "damkohler_number": float(da), "biot_number": None if p.transfer_m_s is None else float(p.transfer_m_s * radius / p.diffusivity_m2_s),
         "minimum_sampled_oxygen_mol_m3": float(concentrations.min()),
         "surface_oxygen_mol_m3": float(surface), "volume_mean_oxygen_mol_m3": float(np.sum(3 * volumes * concentrations)),
@@ -201,6 +211,152 @@ def zero_order_analytic(radius_um, parameters):
         raise ValueError("reference radii must lie within the sphere")
     surface_drop = 0 if p.transfer_m_s is None else p.vmax_mol_m3_s * radius / (3 * p.transfer_m_s)
     return p.bulk_oxygen_mol_m3 - surface_drop - p.vmax_mol_m3_s * (radius ** 2 - r ** 2) / (6 * p.diffusivity_m2_s)
+
+
+def zero_order_critical_radius(parameters):
+    """Largest radius whose exact zero-order core concentration reaches the threshold.
+
+    Setting c(0) = threshold in the closed-form zero-order solution gives a
+    quadratic in R. With a finite surface transfer coefficient the surface drop
+    contributes the linear term; a fixed surface concentration drops it:
+
+        (vmax / 6D) R^2 + (vmax / 3k) R - (c_bulk - threshold) = 0
+
+    Returns ``None`` when the balance has no positive root, which happens when
+    uptake is zero (no radius is limited) or when the bath concentration is
+    already at or below the threshold (no radius qualifies).
+    """
+    p = parameters.validate()
+    headroom = p.bulk_oxygen_mol_m3 - p.threshold_mol_m3
+    if p.vmax_mol_m3_s == 0 or headroom <= 0:
+        return None
+    quadratic = p.vmax_mol_m3_s / (6 * p.diffusivity_m2_s)
+    linear = 0.0 if p.transfer_m_s is None else p.vmax_mol_m3_s / (3 * p.transfer_m_s)
+    radius_m = (math.sqrt(linear ** 2 + 4 * quadratic * headroom) - linear) / (2 * quadratic)
+    return float(radius_m * 1e6)
+
+
+def critical_radius(parameters=Parameters(), *, tolerance_um=0.01, max_radius_um=20000.0,
+                    shells=None):
+    """Find the largest sphere whose sampled core oxygen stays at the threshold.
+
+    The numerical search bisects on the solver's minimum sampled concentration,
+    which is monotone decreasing in radius for fixed uptake. That minimum sits at
+    the innermost shell center rather than exactly at r=0, so the reported radius
+    is the largest radius whose *sampled* core reaches the threshold; refining
+    ``shells`` tightens the gap. The threshold is a user-selected reporting level,
+    not a viability, hypoxia or potency cutoff.
+    """
+    p = parameters.validate()
+    if isinstance(tolerance_um, bool) or not isinstance(tolerance_um, (int, float)) \
+            or not math.isfinite(tolerance_um) or tolerance_um <= 0:
+        raise ValueError("tolerance_um must be a positive finite number")
+    if isinstance(max_radius_um, bool) or not isinstance(max_radius_um, (int, float)) \
+            or not math.isfinite(max_radius_um) or max_radius_um <= 0:
+        raise ValueError("max_radius_um must be a positive finite number")
+    search_shells = p.shells if shells is None else shells
+    analytic = zero_order_critical_radius(replace(p, kinetics="zero_order"))
+
+    infeasible_radii = []
+
+    def sampled_core(radius_um):
+        """Sampled core oxygen, treating an infeasible zero-order radius as below threshold.
+
+        Zero-order uptake predicts negative oxygen beyond a finite radius and the
+        solver fails closed there. Such a radius cannot hold the core at any
+        positive threshold, so the search reads it as below threshold and records it.
+        """
+        candidate = replace(p, radius_um=radius_um, shells=search_shells).validate()
+        try:
+            return float(solve(candidate).summary["minimum_sampled_oxygen_mol_m3"])
+        except (ValueError, RuntimeError) as exc:
+            # The solver fails closed when a configuration predicts negative oxygen or
+            # misses its residual/physical bounds. Record which radius and why rather
+            # than swallowing it.
+            infeasible_radii.append({"radius_um": float(radius_um),
+                                     "reason": f"{type(exc).__name__}: {exc}"})
+            return float("-inf")
+
+    result = {
+        "schema_version": 1,
+        "analysis": "largest radius whose sampled core oxygen reaches the reporting threshold",
+        "parameters": asdict(p),
+        "threshold_mol_m3": p.threshold_mol_m3,
+        "search_shells": search_shells,
+        "tolerance_um": tolerance_um,
+        "zero_order_analytic_radius_um": analytic,
+        "critical_radius_um": None,
+        "status": None,
+        "bracket_um": None,
+        "bisection_iterations": 0,
+        "sampled_core_at_critical_radius_mol_m3": None,
+        "infeasible_searched_radii": infeasible_radii,
+        "interpretation": [],
+    }
+    if p.bulk_oxygen_mol_m3 <= p.threshold_mol_m3:
+        result["status"] = "no_radius_qualifies_bath_at_or_below_threshold"
+        result["interpretation"].append(
+            "The bath concentration is already at or below the reporting threshold, so no sphere qualifies.")
+        return result
+    if p.vmax_mol_m3_s == 0:
+        result["status"] = "unbounded_without_uptake"
+        result["interpretation"].append(
+            "Uptake is zero, so the sphere never falls below the bath concentration and no radius is limiting.")
+        return result
+    if sampled_core(max_radius_um) >= p.threshold_mol_m3:
+        result["status"] = "exceeds_search_bound"
+        result["bracket_um"] = [max_radius_um, None]
+        result["interpretation"].append(
+            f"Even a {max_radius_um:g} um sphere keeps its sampled core at the threshold under these "
+            "illustrative parameters; raise max_radius_um to search further.")
+        return result
+
+    low = min(p.radius_um, max_radius_um) / 2
+    while low > tolerance_um and sampled_core(low) < p.threshold_mol_m3:
+        low /= 2
+    if sampled_core(low) < p.threshold_mol_m3:
+        result["status"] = "below_resolution"
+        result["bracket_um"] = [0.0, low]
+        result["interpretation"].append(
+            "Even the smallest searched sphere falls below the threshold at this uptake; the critical radius "
+            "is smaller than the requested tolerance.")
+        return result
+    high = low * 2
+    while high <= max_radius_um and sampled_core(high) >= p.threshold_mol_m3:
+        low, high = high, high * 2
+    high = min(high, max_radius_um)
+
+    iterations = 0
+    while high - low > tolerance_um:
+        middle = 0.5 * (low + high)
+        if sampled_core(middle) >= p.threshold_mol_m3:
+            low = middle
+        else:
+            high = middle
+        iterations += 1
+    result.update({
+        "critical_radius_um": float(low),
+        "status": "bracketed",
+        "bracket_um": [float(low), float(high)],
+        "bisection_iterations": iterations,
+        "sampled_core_at_critical_radius_mol_m3": sampled_core(low),
+    })
+    result["interpretation"].extend([
+        "Bisection on the solver's minimum sampled concentration, which decreases monotonically with radius "
+        "at fixed uptake.",
+        "The sampled minimum lies at the innermost shell center, not exactly at r=0, so this is the largest "
+        "radius whose sampled core reaches the threshold; refine shells to tighten that gap.",
+        "Michaelis-Menten uptake is at most vmax, so its critical radius is at least the zero-order value; "
+        "the closed-form zero-order radius is reported beside it as an independent check.",
+        "The threshold is a user-selected reporting level. It is not a hypoxia, death, viability or potency "
+        "cutoff, and these parameters are illustrative rather than measured.",
+    ])
+    if infeasible_radii:
+        result["interpretation"].append(
+            "Some searched radii were infeasible for this configuration: the solver fails closed when it "
+            "would predict negative oxygen or miss its residual bounds, which zero-order uptake does beyond "
+            "a finite radius. Those radii were read as below threshold and are listed with their reasons.")
+    return result
 
 
 def solve_transient(

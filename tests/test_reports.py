@@ -20,6 +20,7 @@ from oxygenlab.cli import (
     save,
     save_transient,
     sweep_transfer,
+    write_critical_radius,
 )
 from oxygenlab.model import Parameters, solve, solve_transient
 
@@ -305,3 +306,30 @@ class ReportTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CriticalRadiusReportTests(unittest.TestCase):
+    def test_report_publishes_both_estimates_and_refuses_reuse(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / "critical"
+            report = write_critical_radius(output, Parameters(shells=200), tolerance_um=0.05, shells=200)
+            saved = json.loads((output / "critical_radius.json").read_text(encoding="utf-8"))
+            self.assertEqual(saved["status"], "bracketed")
+            self.assertEqual(saved["critical_radius_um"], report["critical_radius_um"])
+            self.assertIsNotNone(saved["zero_order_analytic_radius_um"])
+            self.assertIsNone(saved["input_sha256"])
+            text = (output / "REPORT.md").read_text(encoding="utf-8")
+            self.assertIn("Threshold-limited sphere size", text)
+            self.assertIn("Closed-form zero-order radius", text)
+            self.assertIn("not a hypoxia, death, viability or potency", text)
+            with self.assertRaises(FileExistsError):
+                write_critical_radius(output, Parameters(shells=200))
+
+    def test_degenerate_report_states_the_reason_without_a_radius(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / "no-uptake"
+            report = write_critical_radius(output, Parameters(vmax_mol_m3_s=0.0, shells=64))
+            self.assertEqual(report["status"], "unbounded_without_uptake")
+            text = (output / "REPORT.md").read_text(encoding="utf-8")
+            self.assertIn("unavailable", text)
+            self.assertIn("no radius is limiting", text)
