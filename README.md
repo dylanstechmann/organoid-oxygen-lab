@@ -1,5 +1,7 @@
 # Organoid Oxygen Lab
 
+This is a personal hobby and learning project, developed with substantial assistance from AI coding tools.
+
 **Explore how sphere size, oxygen uptake and surface resistance shape oxygen
 gradients in an idealized organoid.**
 
