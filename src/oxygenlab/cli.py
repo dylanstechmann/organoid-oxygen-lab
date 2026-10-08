@@ -211,6 +211,55 @@ def sweep_vmax(output, parameters=None, vmax_values=(0.0, 0.005, 0.01, 0.02, 0.0
     return {"rows": rows, "core_nonincreasing": monotone, "worst_relative_mass_balance_error": worst}
 
 
+KM_VALUES_MOL_M3 = (0.002, 0.005, 0.01, 0.02, 0.05)
+
+
+def km_critical_radius_rows(parameters=None, km_values=KM_VALUES_MOL_M3):
+    """Critical radius against the Michaelis constant at otherwise fixed illustrative parameters."""
+    parameters = Parameters() if parameters is None else parameters
+    rows = []
+    for km in km_values:
+        result = critical_radius(replace(parameters, km_mol_m3=float(km)))
+        rows.append({
+            "km_mol_m3": float(km),
+            "status": result["status"],
+            "critical_radius_um": result["critical_radius_um"],
+            "zero_order_analytic_radius_um": result["zero_order_analytic_radius_um"],
+        })
+    return rows
+
+
+def sweep_km(output, parameters=None, km_values=KM_VALUES_MOL_M3):
+    """One question: how far does the critical radius move when only km changes?"""
+    rows = km_critical_radius_rows(parameters, km_values)
+    bracketed = [row["critical_radius_um"] for row in rows if row["status"] == "bracketed"]
+    nondecreasing = all(b >= a - 1e-9 for a, b in zip(bracketed, bracketed[1:]))
+    with _report_directory(output) as staged:
+        with (staged / "km_critical_radius.csv").open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=list(rows[0]), lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(rows)
+        lines = [
+            "# Illustrative km sensitivity of the critical radius",
+            "",
+            "Question: with every other parameter fixed, how does the largest radius whose sampled core",
+            "stays at the reporting threshold change as `km_mol_m3` changes?",
+            "",
+            "These km values are not measured. The critical radius is a reporting level, not a viability cutoff.",
+            "",
+            "| km (mol/m³) | Status | Critical radius (um) | Zero-order analytic radius (um) |",
+            "|---:|---|---:|---:|",
+        ]
+        for row in rows:
+            radius = "n/a" if row["critical_radius_um"] is None else f"{row['critical_radius_um']:.2f}"
+            lines.append(f"| {row['km_mol_m3']:g} | {row['status']} | {radius} | "
+                         f"{row['zero_order_analytic_radius_um']:.2f} |")
+        lines += ["", f"Critical radius nondecreasing in km across the bracketed rows: {nondecreasing}.",
+                  "A sensitivity grid is not a fit and does not identify km.", ""]
+        (staged / "REPORT.md").write_text("\n".join(lines), encoding="utf-8")
+    return {"rows": rows, "nondecreasing_in_km": nondecreasing}
+
+
 def transfer_sweep_rows(parameters=None, transfer_values_m_s=(2e-6, 5e-6, 1e-5, 2e-5, 5e-5)):
     """Vary only the illustrative surface mass-transfer coefficient (m/s)."""
     parameters = (Parameters() if parameters is None else parameters).validate()
@@ -602,6 +651,8 @@ def main(argv=None):
     s.add_argument("config"); s.add_argument("--out", required=True)
     sweep = commands.add_parser("sweep-vmax", help="illustrative uptake sweep at the default radius")
     sweep.add_argument("--out", required=True)
+    km = commands.add_parser("sweep-km", help="illustrative km sensitivity of the critical radius")
+    km.add_argument("--out", required=True)
     transfer = commands.add_parser("sweep-transfer", help="illustrative surface-transfer sweep (m/s)")
     transfer.add_argument("--out", required=True)
     transfer.add_argument("--plot", action="store_true")
@@ -644,6 +695,8 @@ def main(argv=None):
             report = demo(args.out, plot=args.plot)
         elif args.command == "sweep-vmax":
             report = sweep_vmax(args.out)
+        elif args.command == "sweep-km":
+            report = sweep_km(args.out)
         elif args.command == "sweep-transfer":
             report = sweep_transfer(args.out, plot=args.plot)
         elif args.command == "sensitivity":

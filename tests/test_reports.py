@@ -19,6 +19,7 @@ from oxygenlab.cli import (
     main,
     save,
     save_transient,
+    sweep_km,
     sweep_transfer,
     write_critical_radius,
 )
@@ -194,6 +195,23 @@ class ReportTests(unittest.TestCase):
         self.assertIn("radius_um", completed.stderr)
         self.assertEqual(completed.stdout, "")
         self.assertEqual({entry.name for entry in self.root.iterdir()}, {"report", "invalid.json"})
+
+    def test_km_sweep_moves_the_critical_radius_the_documented_way(self):
+        result = sweep_km(self.output)
+        rows = result["rows"]
+        self.assertTrue(all(row["status"] == "bracketed" for row in rows))
+        radii = [row["critical_radius_um"] for row in rows]
+        self.assertEqual(radii, sorted(radii))
+        self.assertGreater(radii[-1], radii[0])
+        # Michaelis-Menten uptake never exceeds vmax, so the zero-order radius is a lower bound.
+        for row in rows:
+            self.assertGreaterEqual(row["critical_radius_um"] + 0.05, row["zero_order_analytic_radius_um"])
+        self.assertTrue(result["nondecreasing_in_km"])
+        report = (self.output / "REPORT.md").read_text(encoding="utf-8")
+        self.assertIn("not measured", report)
+        self.assertTrue((self.output / "km_critical_radius.csv").is_file())
+        with self.assertRaises(Exception):
+            sweep_km(self.output)
 
     def test_transfer_sweep_report_records_units_and_preserves_existing_output(self):
         result = sweep_transfer(self.output)

@@ -10,6 +10,8 @@ It reports radial profiles, integrated uptake, surface influx, mass-balance
 error and the volume below a user-selected concentration threshold. A finite
 volume method keeps local uptake and diffusive fluxes consistent.
 
+`oxygenlab sweep-km --out artifacts/km` changes only the illustrative Michaelis constant and reports the critical radius for each value. On the default parameters (2026-10-08 run) it rose from about 250 um at km 0.002 mol/m³ to about 375 um at 0.05, always above the zero-order analytic radius of about 244 um. This is a sensitivity grid, not a fit, and says nothing about measured km.
+
 `oxygenlab sweep-vmax` holds radius fixed and raises illustrative `vmax`. The question is only whether core oxygen falls and mass balance stays small. It is not a fitted uptake.
 
 `oxygenlab sweep-transfer --out artifacts/transfer --plot` holds radius and
@@ -45,6 +47,7 @@ python -m pip install -e '.[plots]'
 python -m unittest discover -s tests -v
 oxygenlab demo --out artifacts/demo --plot
 oxygenlab sweep-vmax --out artifacts/vmax
+oxygenlab sweep-km --out artifacts/km
 oxygenlab sweep-transfer --out artifacts/transfer --plot
 oxygenlab sensitivity --out artifacts/local-sensitivity
 oxygenlab inverse-demo --out artifacts/constructed-inverse --seed 4
