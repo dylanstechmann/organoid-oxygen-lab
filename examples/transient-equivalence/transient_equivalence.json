@@ -1,0 +1,1948 @@
+{
+  "schema_version": 1,
+  "origin": "constructed_transient_rate_equivalence",
+  "rate_scale": 2.0,
+  "baseline_parameters": {
+    "radius_um": 300.0,
+    "diffusivity_m2_s": 2e-09,
+    "bulk_oxygen_mol_m3": 0.2,
+    "vmax_mol_m3_s": 0.02,
+    "km_mol_m3": 0.01,
+    "transfer_m_s": 2e-05,
+    "threshold_mol_m3": 0.02,
+    "shells": 160,
+    "kinetics": "michaelis_menten"
+  },
+  "scaled_parameters": {
+    "radius_um": 300.0,
+    "diffusivity_m2_s": 4e-09,
+    "bulk_oxygen_mol_m3": 0.2,
+    "vmax_mol_m3_s": 0.04,
+    "km_mol_m3": 0.01,
+    "transfer_m_s": 4e-05,
+    "threshold_mol_m3": 0.02,
+    "shells": 160,
+    "kinetics": "michaelis_menten"
+  },
+  "total_time_s": 1200.0,
+  "time_steps": 120,
+  "initial_oxygen_mol_m3": 0.0,
+  "time_relation": "scaled time = baseline time / rate_scale at matched dimensionless time",
+  "max_dimensionless_time_grid_difference": 0.0,
+  "max_transient_profile_difference_mol_m3": 0.0,
+  "max_steady_profile_difference_mol_m3": 0.0,
+  "time_to_95pct_core_change_s": {
+    "baseline": 42.96604252430131,
+    "scaled": 21.483021262150654,
+    "baseline_over_scaled": 2.0,
+    "expected_baseline_over_scaled": 2.0
+  },
+  "final_rate_outputs": {
+    "total_uptake_mol_s": {
+      "baseline": 1.906512848239441e-12,
+      "scaled": 3.813025696478882e-12
+    },
+    "surface_influx_mol_s": {
+      "baseline": 1.906512848239441e-12,
+      "scaled": 3.813025696478882e-12
+    },
+    "uptake_scaled_over_baseline": 2.0,
+    "influx_scaled_over_baseline": 2.0
+  },
+  "max_relative_transient_mass_balance_error": {
+    "baseline": 2.53892949773608e-10,
+    "scaled": 2.53892949773608e-10
+  },
+  "trajectory": [
+    {
+      "dimensionless_time_tau": 0.0,
+      "baseline_time_s": 0.0,
+      "scaled_time_s": 0.0,
+      "baseline_core_oxygen_mol_m3": 0.0,
+      "scaled_core_oxygen_mol_m3": 0.0,
+      "baseline_volume_mean_oxygen_mol_m3": 0.0,
+      "scaled_volume_mean_oxygen_mol_m3": 0.0
+    },
+    {
+      "dimensionless_time_tau": 0.22408963585434177,
+      "baseline_time_s": 10.084033613445378,
+      "scaled_time_s": 5.042016806722689,
+      "baseline_core_oxygen_mol_m3": 0.0017367019304876637,
+      "scaled_core_oxygen_mol_m3": 0.0017367019304876637,
+      "baseline_volume_mean_oxygen_mol_m3": 0.0493942811715831,
+      "scaled_volume_mean_oxygen_mol_m3": 0.0493942811715831
+    },
+    {
+      "dimensionless_time_tau": 0.44817927170868355,
+      "baseline_time_s": 20.168067226890756,
+      "scaled_time_s": 10.084033613445378,
+      "baseline_core_oxygen_mol_m3": 0.004629921958643645,
+      "scaled_core_oxygen_mol_m3": 0.004629921958643645,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06245706306554903,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06245706306554903
+    },
+    {
+      "dimensionless_time_tau": 0.6722689075630253,
+      "baseline_time_s": 30.252100840336134,
+      "scaled_time_s": 15.126050420168067,
+      "baseline_core_oxygen_mol_m3": 0.006564096129853401,
+      "scaled_core_oxygen_mol_m3": 0.006564096129853401,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06641511433652142,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06641511433652142
+    },
+    {
+      "dimensionless_time_tau": 0.8963585434173671,
+      "baseline_time_s": 40.33613445378151,
+      "scaled_time_s": 20.168067226890756,
+      "baseline_core_oxygen_mol_m3": 0.0074192311503656315,
+      "scaled_core_oxygen_mol_m3": 0.0074192311503656315,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06766941311916659,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06766941311916659
+    },
+    {
+      "dimensionless_time_tau": 1.120448179271709,
+      "baseline_time_s": 50.42016806722689,
+      "scaled_time_s": 25.210084033613445,
+      "baseline_core_oxygen_mol_m3": 0.00773512260243461,
+      "scaled_core_oxygen_mol_m3": 0.00773512260243461,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06807317653945663,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06807317653945663
+    },
+    {
+      "dimensionless_time_tau": 1.3445378151260505,
+      "baseline_time_s": 60.50420168067227,
+      "scaled_time_s": 30.252100840336134,
+      "baseline_core_oxygen_mol_m3": 0.007843217336293376,
+      "scaled_core_oxygen_mol_m3": 0.007843217336293376,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06820386887199327,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06820386887199327
+    },
+    {
+      "dimensionless_time_tau": 1.5686274509803926,
+      "baseline_time_s": 70.58823529411765,
+      "scaled_time_s": 35.294117647058826,
+      "baseline_core_oxygen_mol_m3": 0.00787905099004086,
+      "scaled_core_oxygen_mol_m3": 0.00787905099004086,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06824625452537256,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06824625452537256
+    },
+    {
+      "dimensionless_time_tau": 1.7927170868347342,
+      "baseline_time_s": 80.67226890756302,
+      "scaled_time_s": 40.33613445378151,
+      "baseline_core_oxygen_mol_m3": 0.007890779225708426,
+      "scaled_core_oxygen_mol_m3": 0.007890779225708426,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826001034693512,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826001034693512
+    },
+    {
+      "dimensionless_time_tau": 2.0168067226890756,
+      "baseline_time_s": 90.7563025210084,
+      "scaled_time_s": 45.3781512605042,
+      "baseline_core_oxygen_mol_m3": 0.007894598676951177,
+      "scaled_core_oxygen_mol_m3": 0.007894598676951177,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826447574324541,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826447574324541
+    },
+    {
+      "dimensionless_time_tau": 2.240896358543418,
+      "baseline_time_s": 100.84033613445378,
+      "scaled_time_s": 50.42016806722689,
+      "baseline_core_oxygen_mol_m3": 0.007895840090608874,
+      "scaled_core_oxygen_mol_m3": 0.007895840090608874,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826592540494897,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826592540494897
+    },
+    {
+      "dimensionless_time_tau": 2.4649859943977597,
+      "baseline_time_s": 110.92436974789916,
+      "scaled_time_s": 55.46218487394958,
+      "baseline_core_oxygen_mol_m3": 0.007896243359843137,
+      "scaled_core_oxygen_mol_m3": 0.007896243359843137,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826639606004327,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826639606004327
+    },
+    {
+      "dimensionless_time_tau": 2.689075630252101,
+      "baseline_time_s": 121.00840336134453,
+      "scaled_time_s": 60.50420168067227,
+      "baseline_core_oxygen_mol_m3": 0.007896374304343817,
+      "scaled_core_oxygen_mol_m3": 0.007896374304343817,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826654886443642,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826654886443642
+    },
+    {
+      "dimensionless_time_tau": 2.913165266106443,
+      "baseline_time_s": 131.0924369747899,
+      "scaled_time_s": 65.54621848739495,
+      "baseline_core_oxygen_mol_m3": 0.007896416818542393,
+      "scaled_core_oxygen_mol_m3": 0.007896416818542393,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826659847428924,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826659847428924
+    },
+    {
+      "dimensionless_time_tau": 3.137254901960785,
+      "baseline_time_s": 141.1764705882353,
+      "scaled_time_s": 70.58823529411765,
+      "baseline_core_oxygen_mol_m3": 0.007896430621408568,
+      "scaled_core_oxygen_mol_m3": 0.007896430621408568,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826661458073445,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826661458073445
+    },
+    {
+      "dimensionless_time_tau": 3.3613445378151265,
+      "baseline_time_s": 151.26050420168067,
+      "scaled_time_s": 75.63025210084034,
+      "baseline_core_oxygen_mol_m3": 0.00789643510268451,
+      "scaled_core_oxygen_mol_m3": 0.00789643510268451,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826661980988731,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826661980988731
+    },
+    {
+      "dimensionless_time_tau": 3.5854341736694684,
+      "baseline_time_s": 161.34453781512605,
+      "scaled_time_s": 80.67226890756302,
+      "baseline_core_oxygen_mol_m3": 0.007896436557585406,
+      "scaled_core_oxygen_mol_m3": 0.007896436557585406,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662150759506,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662150759506
+    },
+    {
+      "dimensionless_time_tau": 3.8095238095238098,
+      "baseline_time_s": 171.42857142857142,
+      "scaled_time_s": 85.71428571428571,
+      "baseline_core_oxygen_mol_m3": 0.007896437029936573,
+      "scaled_core_oxygen_mol_m3": 0.007896437029936573,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662205877641,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662205877641
+    },
+    {
+      "dimensionless_time_tau": 4.033613445378151,
+      "baseline_time_s": 181.5126050420168,
+      "scaled_time_s": 90.7563025210084,
+      "baseline_core_oxygen_mol_m3": 0.007896437183291083,
+      "scaled_core_oxygen_mol_m3": 0.007896437183291083,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662223772412,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662223772412
+    },
+    {
+      "dimensionless_time_tau": 4.257703081232494,
+      "baseline_time_s": 191.5966386554622,
+      "scaled_time_s": 95.7983193277311,
+      "baseline_core_oxygen_mol_m3": 0.007896437233079477,
+      "scaled_core_oxygen_mol_m3": 0.007896437233079477,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662229582163,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662229582163
+    },
+    {
+      "dimensionless_time_tau": 4.481792717086836,
+      "baseline_time_s": 201.68067226890756,
+      "scaled_time_s": 100.84033613445378,
+      "baseline_core_oxygen_mol_m3": 0.00789643724924388,
+      "scaled_core_oxygen_mol_m3": 0.00789643724924388,
+      "baseline_volume_mean_oxygen_mol_m3": 0.0682666223146837,
+      "scaled_volume_mean_oxygen_mol_m3": 0.0682666223146837
+    },
+    {
+      "dimensionless_time_tau": 4.705882352941177,
+      "baseline_time_s": 211.76470588235293,
+      "scaled_time_s": 105.88235294117646,
+      "baseline_core_oxygen_mol_m3": 0.007896437254491849,
+      "scaled_core_oxygen_mol_m3": 0.007896437254491849,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232080749,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232080749
+    },
+    {
+      "dimensionless_time_tau": 4.929971988795519,
+      "baseline_time_s": 221.84873949579833,
+      "scaled_time_s": 110.92436974789916,
+      "baseline_core_oxygen_mol_m3": 0.007896437256195666,
+      "scaled_core_oxygen_mol_m3": 0.007896437256195666,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232279565,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232279565
+    },
+    {
+      "dimensionless_time_tau": 5.154061624649861,
+      "baseline_time_s": 231.9327731092437,
+      "scaled_time_s": 115.96638655462185,
+      "baseline_core_oxygen_mol_m3": 0.007896437256748831,
+      "scaled_core_oxygen_mol_m3": 0.007896437256748831,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232344113,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232344113
+    },
+    {
+      "dimensionless_time_tau": 5.378151260504202,
+      "baseline_time_s": 242.01680672268907,
+      "scaled_time_s": 121.00840336134453,
+      "baseline_core_oxygen_mol_m3": 0.007896437256928422,
+      "scaled_core_oxygen_mol_m3": 0.007896437256928422,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232365069,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232365069
+    },
+    {
+      "dimensionless_time_tau": 5.602240896358544,
+      "baseline_time_s": 252.10084033613444,
+      "scaled_time_s": 126.05042016806722,
+      "baseline_core_oxygen_mol_m3": 0.007896437256986728,
+      "scaled_core_oxygen_mol_m3": 0.007896437256986728,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232371873,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232371873
+    },
+    {
+      "dimensionless_time_tau": 5.826330532212886,
+      "baseline_time_s": 262.1848739495798,
+      "scaled_time_s": 131.0924369747899,
+      "baseline_core_oxygen_mol_m3": 0.007896437257005657,
+      "scaled_core_oxygen_mol_m3": 0.007896437257005657,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232374082,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232374082
+    },
+    {
+      "dimensionless_time_tau": 6.050420168067228,
+      "baseline_time_s": 272.2689075630252,
+      "scaled_time_s": 136.1344537815126,
+      "baseline_core_oxygen_mol_m3": 0.007896437257011805,
+      "scaled_core_oxygen_mol_m3": 0.007896437257011805,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232374799,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232374799
+    },
+    {
+      "dimensionless_time_tau": 6.27450980392157,
+      "baseline_time_s": 282.3529411764706,
+      "scaled_time_s": 141.1764705882353,
+      "baseline_core_oxygen_mol_m3": 0.007896437257013798,
+      "scaled_core_oxygen_mol_m3": 0.007896437257013798,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375032,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375032
+    },
+    {
+      "dimensionless_time_tau": 6.498599439775911,
+      "baseline_time_s": 292.43697478991595,
+      "scaled_time_s": 146.21848739495798,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014445,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014445,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375107,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375107
+    },
+    {
+      "dimensionless_time_tau": 6.722689075630253,
+      "baseline_time_s": 302.52100840336135,
+      "scaled_time_s": 151.26050420168067,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014657,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014657,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375132,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375132
+    },
+    {
+      "dimensionless_time_tau": 6.946778711484594,
+      "baseline_time_s": 312.6050420168067,
+      "scaled_time_s": 156.30252100840335,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014726,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014726,
+      "baseline_volume_mean_oxygen_mol_m3": 0.0682666223237514,
+      "scaled_volume_mean_oxygen_mol_m3": 0.0682666223237514
+    },
+    {
+      "dimensionless_time_tau": 7.170868347338937,
+      "baseline_time_s": 322.6890756302521,
+      "scaled_time_s": 161.34453781512605,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014747,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014747,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375141,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375141
+    },
+    {
+      "dimensionless_time_tau": 7.394957983193279,
+      "baseline_time_s": 332.7731092436975,
+      "scaled_time_s": 166.38655462184875,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014754,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014754,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375144,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375144
+    },
+    {
+      "dimensionless_time_tau": 7.6190476190476195,
+      "baseline_time_s": 342.85714285714283,
+      "scaled_time_s": 171.42857142857142,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 7.843137254901962,
+      "baseline_time_s": 352.94117647058823,
+      "scaled_time_s": 176.47058823529412,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 8.067226890756302,
+      "baseline_time_s": 363.0252100840336,
+      "scaled_time_s": 181.5126050420168,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 8.291316526610645,
+      "baseline_time_s": 373.109243697479,
+      "scaled_time_s": 186.5546218487395,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 8.515406162464988,
+      "baseline_time_s": 383.1932773109244,
+      "scaled_time_s": 191.5966386554622,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 8.739495798319329,
+      "baseline_time_s": 393.2773109243697,
+      "scaled_time_s": 196.63865546218486,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 8.963585434173671,
+      "baseline_time_s": 403.3613445378151,
+      "scaled_time_s": 201.68067226890756,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 9.187675070028012,
+      "baseline_time_s": 413.4453781512605,
+      "scaled_time_s": 206.72268907563026,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 9.411764705882353,
+      "baseline_time_s": 423.52941176470586,
+      "scaled_time_s": 211.76470588235293,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 9.635854341736696,
+      "baseline_time_s": 433.61344537815125,
+      "scaled_time_s": 216.80672268907563,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 9.859943977591039,
+      "baseline_time_s": 443.69747899159665,
+      "scaled_time_s": 221.84873949579833,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 10.08403361344538,
+      "baseline_time_s": 453.781512605042,
+      "scaled_time_s": 226.890756302521,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 10.308123249299722,
+      "baseline_time_s": 463.8655462184874,
+      "scaled_time_s": 231.9327731092437,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 10.532212885154063,
+      "baseline_time_s": 473.94957983193274,
+      "scaled_time_s": 236.97478991596637,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 10.756302521008404,
+      "baseline_time_s": 484.03361344537814,
+      "scaled_time_s": 242.01680672268907,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 10.980392156862747,
+      "baseline_time_s": 494.11764705882354,
+      "scaled_time_s": 247.05882352941177,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 11.204481792717088,
+      "baseline_time_s": 504.2016806722689,
+      "scaled_time_s": 252.10084033613444,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 11.428571428571429,
+      "baseline_time_s": 514.2857142857142,
+      "scaled_time_s": 257.1428571428571,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 11.652661064425772,
+      "baseline_time_s": 524.3697478991596,
+      "scaled_time_s": 262.1848739495798,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 11.876750700280114,
+      "baseline_time_s": 534.453781512605,
+      "scaled_time_s": 267.2268907563025,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 12.100840336134455,
+      "baseline_time_s": 544.5378151260504,
+      "scaled_time_s": 272.2689075630252,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 12.324929971988798,
+      "baseline_time_s": 554.6218487394958,
+      "scaled_time_s": 277.3109243697479,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 12.54901960784314,
+      "baseline_time_s": 564.7058823529412,
+      "scaled_time_s": 282.3529411764706,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 12.77310924369748,
+      "baseline_time_s": 574.7899159663865,
+      "scaled_time_s": 287.39495798319325,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 12.997198879551823,
+      "baseline_time_s": 584.8739495798319,
+      "scaled_time_s": 292.43697478991595,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 13.221288515406163,
+      "baseline_time_s": 594.9579831932773,
+      "scaled_time_s": 297.47899159663865,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 13.445378151260506,
+      "baseline_time_s": 605.0420168067227,
+      "scaled_time_s": 302.52100840336135,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 13.669467787114849,
+      "baseline_time_s": 615.1260504201681,
+      "scaled_time_s": 307.56302521008405,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 13.893557422969188,
+      "baseline_time_s": 625.2100840336134,
+      "scaled_time_s": 312.6050420168067,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 14.11764705882353,
+      "baseline_time_s": 635.2941176470588,
+      "scaled_time_s": 317.6470588235294,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 14.341736694677873,
+      "baseline_time_s": 645.3781512605042,
+      "scaled_time_s": 322.6890756302521,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 14.565826330532214,
+      "baseline_time_s": 655.4621848739496,
+      "scaled_time_s": 327.7310924369748,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 14.789915966386557,
+      "baseline_time_s": 665.546218487395,
+      "scaled_time_s": 332.7731092436975,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 15.014005602240896,
+      "baseline_time_s": 675.6302521008403,
+      "scaled_time_s": 337.81512605042013,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 15.238095238095239,
+      "baseline_time_s": 685.7142857142857,
+      "scaled_time_s": 342.85714285714283,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 15.462184873949582,
+      "baseline_time_s": 695.7983193277311,
+      "scaled_time_s": 347.89915966386553,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 15.686274509803924,
+      "baseline_time_s": 705.8823529411765,
+      "scaled_time_s": 352.94117647058823,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 15.910364145658265,
+      "baseline_time_s": 715.9663865546219,
+      "scaled_time_s": 357.98319327731093,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 16.134453781512605,
+      "baseline_time_s": 726.0504201680671,
+      "scaled_time_s": 363.0252100840336,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 16.35854341736695,
+      "baseline_time_s": 736.1344537815125,
+      "scaled_time_s": 368.0672268907563,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 16.58263305322129,
+      "baseline_time_s": 746.218487394958,
+      "scaled_time_s": 373.109243697479,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 16.80672268907563,
+      "baseline_time_s": 756.3025210084033,
+      "scaled_time_s": 378.1512605042017,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 17.030812324929975,
+      "baseline_time_s": 766.3865546218487,
+      "scaled_time_s": 383.1932773109244,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 17.254901960784316,
+      "baseline_time_s": 776.4705882352941,
+      "scaled_time_s": 388.2352941176471,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 17.478991596638657,
+      "baseline_time_s": 786.5546218487394,
+      "scaled_time_s": 393.2773109243697,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 17.703081232493,
+      "baseline_time_s": 796.6386554621848,
+      "scaled_time_s": 398.3193277310924,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 17.927170868347343,
+      "baseline_time_s": 806.7226890756302,
+      "scaled_time_s": 403.3613445378151,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 18.151260504201684,
+      "baseline_time_s": 816.8067226890756,
+      "scaled_time_s": 408.4033613445378,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 18.375350140056025,
+      "baseline_time_s": 826.890756302521,
+      "scaled_time_s": 413.4453781512605,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 18.599439775910366,
+      "baseline_time_s": 836.9747899159663,
+      "scaled_time_s": 418.48739495798316,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 18.823529411764707,
+      "baseline_time_s": 847.0588235294117,
+      "scaled_time_s": 423.52941176470586,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 19.04761904761905,
+      "baseline_time_s": 857.1428571428571,
+      "scaled_time_s": 428.57142857142856,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 19.271708683473392,
+      "baseline_time_s": 867.2268907563025,
+      "scaled_time_s": 433.61344537815125,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 19.495798319327733,
+      "baseline_time_s": 877.3109243697479,
+      "scaled_time_s": 438.65546218487395,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 19.719887955182077,
+      "baseline_time_s": 887.3949579831933,
+      "scaled_time_s": 443.69747899159665,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 19.943977591036415,
+      "baseline_time_s": 897.4789915966386,
+      "scaled_time_s": 448.7394957983193,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 20.16806722689076,
+      "baseline_time_s": 907.563025210084,
+      "scaled_time_s": 453.781512605042,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 20.3921568627451,
+      "baseline_time_s": 917.6470588235294,
+      "scaled_time_s": 458.8235294117647,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 20.616246498599445,
+      "baseline_time_s": 927.7310924369748,
+      "scaled_time_s": 463.8655462184874,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 20.840336134453786,
+      "baseline_time_s": 937.8151260504202,
+      "scaled_time_s": 468.9075630252101,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 21.064425770308127,
+      "baseline_time_s": 947.8991596638655,
+      "scaled_time_s": 473.94957983193274,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 21.288515406162468,
+      "baseline_time_s": 957.9831932773109,
+      "scaled_time_s": 478.99159663865544,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 21.51260504201681,
+      "baseline_time_s": 968.0672268907563,
+      "scaled_time_s": 484.03361344537814,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 21.736694677871153,
+      "baseline_time_s": 978.1512605042017,
+      "scaled_time_s": 489.07563025210084,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 21.960784313725494,
+      "baseline_time_s": 988.2352941176471,
+      "scaled_time_s": 494.11764705882354,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 22.184873949579835,
+      "baseline_time_s": 998.3193277310924,
+      "scaled_time_s": 499.1596638655462,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 22.408963585434176,
+      "baseline_time_s": 1008.4033613445378,
+      "scaled_time_s": 504.2016806722689,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 22.633053221288517,
+      "baseline_time_s": 1018.4873949579832,
+      "scaled_time_s": 509.2436974789916,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 22.857142857142858,
+      "baseline_time_s": 1028.5714285714284,
+      "scaled_time_s": 514.2857142857142,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 23.0812324929972,
+      "baseline_time_s": 1038.6554621848738,
+      "scaled_time_s": 519.3277310924369,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 23.305322128851543,
+      "baseline_time_s": 1048.7394957983192,
+      "scaled_time_s": 524.3697478991596,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 23.529411764705884,
+      "baseline_time_s": 1058.8235294117646,
+      "scaled_time_s": 529.4117647058823,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 23.75350140056023,
+      "baseline_time_s": 1068.90756302521,
+      "scaled_time_s": 534.453781512605,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 23.97759103641457,
+      "baseline_time_s": 1078.9915966386554,
+      "scaled_time_s": 539.4957983193277,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 24.20168067226891,
+      "baseline_time_s": 1089.0756302521008,
+      "scaled_time_s": 544.5378151260504,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 24.425770308123255,
+      "baseline_time_s": 1099.1596638655462,
+      "scaled_time_s": 549.5798319327731,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 24.649859943977596,
+      "baseline_time_s": 1109.2436974789916,
+      "scaled_time_s": 554.6218487394958,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 24.873949579831937,
+      "baseline_time_s": 1119.327731092437,
+      "scaled_time_s": 559.6638655462185,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 25.09803921568628,
+      "baseline_time_s": 1129.4117647058824,
+      "scaled_time_s": 564.7058823529412,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 25.32212885154062,
+      "baseline_time_s": 1139.4957983193276,
+      "scaled_time_s": 569.7478991596638,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 25.54621848739496,
+      "baseline_time_s": 1149.579831932773,
+      "scaled_time_s": 574.7899159663865,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 25.7703081232493,
+      "baseline_time_s": 1159.6638655462184,
+      "scaled_time_s": 579.8319327731092,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 25.994397759103645,
+      "baseline_time_s": 1169.7478991596638,
+      "scaled_time_s": 584.8739495798319,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 26.218487394957986,
+      "baseline_time_s": 1179.8319327731092,
+      "scaled_time_s": 589.9159663865546,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 26.442577030812327,
+      "baseline_time_s": 1189.9159663865546,
+      "scaled_time_s": 594.9579831932773,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    },
+    {
+      "dimensionless_time_tau": 26.66666666666667,
+      "baseline_time_s": 1200.0,
+      "scaled_time_s": 600.0,
+      "baseline_core_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_core_oxygen_mol_m3": 0.007896437257014758,
+      "baseline_volume_mean_oxygen_mol_m3": 0.06826662232375146,
+      "scaled_volume_mean_oxygen_mol_m3": 0.06826662232375146
+    }
+  ],
+  "final_matched_time_profiles": [
+    {
+      "radius_um": 0.9375,
+      "baseline_oxygen_mol_m3": 0.007896437257014758,
+      "scaled_oxygen_mol_m3": 0.007896437257014758
+    },
+    {
+      "radius_um": 2.8125000000000004,
+      "baseline_oxygen_mol_m3": 0.007901607915999935,
+      "scaled_oxygen_mol_m3": 0.007901607915999935
+    },
+    {
+      "radius_um": 4.6875,
+      "baseline_oxygen_mol_m3": 0.007911952543807324,
+      "scaled_oxygen_mol_m3": 0.007911952543807324
+    },
+    {
+      "radius_um": 6.562500000000001,
+      "baseline_oxygen_mol_m3": 0.007927477965895905,
+      "scaled_oxygen_mol_m3": 0.007927477965895905
+    },
+    {
+      "radius_um": 8.4375,
+      "baseline_oxygen_mol_m3": 0.007948194383286776,
+      "scaled_oxygen_mol_m3": 0.007948194383286776
+    },
+    {
+      "radius_um": 10.3125,
+      "baseline_oxygen_mol_m3": 0.007974115372129229,
+      "scaled_oxygen_mol_m3": 0.007974115372129229
+    },
+    {
+      "radius_um": 12.187500000000002,
+      "baseline_oxygen_mol_m3": 0.008005257868426763,
+      "scaled_oxygen_mol_m3": 0.008005257868426763
+    },
+    {
+      "radius_um": 14.0625,
+      "baseline_oxygen_mol_m3": 0.008041642146949904,
+      "scaled_oxygen_mol_m3": 0.008041642146949904
+    },
+    {
+      "radius_um": 15.937500000000002,
+      "baseline_oxygen_mol_m3": 0.008083291795484697,
+      "scaled_oxygen_mol_m3": 0.008083291795484697
+    },
+    {
+      "radius_um": 17.8125,
+      "baseline_oxygen_mol_m3": 0.008130233684694937,
+      "scaled_oxygen_mol_m3": 0.008130233684694937
+    },
+    {
+      "radius_um": 19.6875,
+      "baseline_oxygen_mol_m3": 0.008182497933706553,
+      "scaled_oxygen_mol_m3": 0.008182497933706553
+    },
+    {
+      "radius_um": 21.562500000000004,
+      "baseline_oxygen_mol_m3": 0.008240117871480677,
+      "scaled_oxygen_mol_m3": 0.008240117871480677
+    },
+    {
+      "radius_um": 23.4375,
+      "baseline_oxygen_mol_m3": 0.008303129994032321,
+      "scaled_oxygen_mol_m3": 0.008303129994032321
+    },
+    {
+      "radius_um": 25.3125,
+      "baseline_oxygen_mol_m3": 0.008371573917552307,
+      "scaled_oxygen_mol_m3": 0.008371573917552307
+    },
+    {
+      "radius_um": 27.187500000000004,
+      "baseline_oxygen_mol_m3": 0.008445492327494605,
+      "scaled_oxygen_mol_m3": 0.008445492327494605
+    },
+    {
+      "radius_um": 29.0625,
+      "baseline_oxygen_mol_m3": 0.008524930923697759,
+      "scaled_oxygen_mol_m3": 0.008524930923697759
+    },
+    {
+      "radius_um": 30.937500000000004,
+      "baseline_oxygen_mol_m3": 0.008609938361616552,
+      "scaled_oxygen_mol_m3": 0.008609938361616552
+    },
+    {
+      "radius_um": 32.8125,
+      "baseline_oxygen_mol_m3": 0.008700566189748338,
+      "scaled_oxygen_mol_m3": 0.008700566189748338
+    },
+    {
+      "radius_um": 34.6875,
+      "baseline_oxygen_mol_m3": 0.008796868783347168,
+      "scaled_oxygen_mol_m3": 0.008796868783347168
+    },
+    {
+      "radius_um": 36.5625,
+      "baseline_oxygen_mol_m3": 0.008898903274528079,
+      "scaled_oxygen_mol_m3": 0.008898903274528079
+    },
+    {
+      "radius_um": 38.4375,
+      "baseline_oxygen_mol_m3": 0.009006729478873458,
+      "scaled_oxygen_mol_m3": 0.009006729478873458
+    },
+    {
+      "radius_um": 40.31250000000001,
+      "baseline_oxygen_mol_m3": 0.009120409818663158,
+      "scaled_oxygen_mol_m3": 0.009120409818663158
+    },
+    {
+      "radius_um": 42.1875,
+      "baseline_oxygen_mol_m3": 0.009240009242860064,
+      "scaled_oxygen_mol_m3": 0.009240009242860064
+    },
+    {
+      "radius_um": 44.06250000000001,
+      "baseline_oxygen_mol_m3": 0.009365595143992909,
+      "scaled_oxygen_mol_m3": 0.009365595143992909
+    },
+    {
+      "radius_um": 45.9375,
+      "baseline_oxygen_mol_m3": 0.0094972372720882,
+      "scaled_oxygen_mol_m3": 0.0094972372720882
+    },
+    {
+      "radius_um": 47.8125,
+      "baseline_oxygen_mol_m3": 0.009635007645813199,
+      "scaled_oxygen_mol_m3": 0.009635007645813199
+    },
+    {
+      "radius_um": 49.68750000000001,
+      "baseline_oxygen_mol_m3": 0.009778980461001717,
+      "scaled_oxygen_mol_m3": 0.009778980461001717
+    },
+    {
+      "radius_um": 51.5625,
+      "baseline_oxygen_mol_m3": 0.009929231996744059,
+      "scaled_oxygen_mol_m3": 0.009929231996744059
+    },
+    {
+      "radius_um": 53.43750000000001,
+      "baseline_oxygen_mol_m3": 0.01008584051923165,
+      "scaled_oxygen_mol_m3": 0.01008584051923165
+    },
+    {
+      "radius_um": 55.3125,
+      "baseline_oxygen_mol_m3": 0.010248886183555631,
+      "scaled_oxygen_mol_m3": 0.010248886183555631
+    },
+    {
+      "radius_um": 57.1875,
+      "baseline_oxygen_mol_m3": 0.01041845093366676,
+      "scaled_oxygen_mol_m3": 0.01041845093366676
+    },
+    {
+      "radius_um": 59.06250000000001,
+      "baseline_oxygen_mol_m3": 0.010594618400711518,
+      "scaled_oxygen_mol_m3": 0.010594618400711518
+    },
+    {
+      "radius_um": 60.9375,
+      "baseline_oxygen_mol_m3": 0.010777473799965928,
+      "scaled_oxygen_mol_m3": 0.010777473799965928
+    },
+    {
+      "radius_um": 62.81250000000001,
+      "baseline_oxygen_mol_m3": 0.010967103826594483,
+      "scaled_oxygen_mol_m3": 0.010967103826594483
+    },
+    {
+      "radius_um": 64.6875,
+      "baseline_oxygen_mol_m3": 0.011163596550466438,
+      "scaled_oxygen_mol_m3": 0.011163596550466438
+    },
+    {
+      "radius_um": 66.5625,
+      "baseline_oxygen_mol_m3": 0.011367041310265648,
+      "scaled_oxygen_mol_m3": 0.011367041310265648
+    },
+    {
+      "radius_um": 68.4375,
+      "baseline_oxygen_mol_m3": 0.011577528607132945,
+      "scaled_oxygen_mol_m3": 0.011577528607132945
+    },
+    {
+      "radius_um": 70.3125,
+      "baseline_oxygen_mol_m3": 0.011795149998081768,
+      "scaled_oxygen_mol_m3": 0.011795149998081768
+    },
+    {
+      "radius_um": 72.18750000000001,
+      "baseline_oxygen_mol_m3": 0.012019997989428282,
+      "scaled_oxygen_mol_m3": 0.012019997989428282
+    },
+    {
+      "radius_um": 74.0625,
+      "baseline_oxygen_mol_m3": 0.012252165930476684,
+      "scaled_oxygen_mol_m3": 0.012252165930476684
+    },
+    {
+      "radius_um": 75.93750000000001,
+      "baseline_oxygen_mol_m3": 0.012491747907698462,
+      "scaled_oxygen_mol_m3": 0.012491747907698462
+    },
+    {
+      "radius_um": 77.8125,
+      "baseline_oxygen_mol_m3": 0.012738838639641488,
+      "scaled_oxygen_mol_m3": 0.012738838639641488
+    },
+    {
+      "radius_um": 79.6875,
+      "baseline_oxygen_mol_m3": 0.012993533372800495,
+      "scaled_oxygen_mol_m3": 0.012993533372800495
+    },
+    {
+      "radius_um": 81.5625,
+      "baseline_oxygen_mol_m3": 0.013255927778675318,
+      "scaled_oxygen_mol_m3": 0.013255927778675318
+    },
+    {
+      "radius_um": 83.4375,
+      "baseline_oxygen_mol_m3": 0.013526117852236605,
+      "scaled_oxygen_mol_m3": 0.013526117852236605
+    },
+    {
+      "radius_um": 85.31250000000001,
+      "baseline_oxygen_mol_m3": 0.013804199812011368,
+      "scaled_oxygen_mol_m3": 0.013804199812011368
+    },
+    {
+      "radius_um": 87.1875,
+      "baseline_oxygen_mol_m3": 0.014090270001992033,
+      "scaled_oxygen_mol_m3": 0.014090270001992033
+    },
+    {
+      "radius_um": 89.0625,
+      "baseline_oxygen_mol_m3": 0.0143844247955633,
+      "scaled_oxygen_mol_m3": 0.0143844247955633
+    },
+    {
+      "radius_um": 90.93750000000001,
+      "baseline_oxygen_mol_m3": 0.014686760501630645,
+      "scaled_oxygen_mol_m3": 0.014686760501630645
+    },
+    {
+      "radius_um": 92.8125,
+      "baseline_oxygen_mol_m3": 0.014997373273123263,
+      "scaled_oxygen_mol_m3": 0.014997373273123263
+    },
+    {
+      "radius_um": 94.68750000000001,
+      "baseline_oxygen_mol_m3": 0.015316359018032405,
+      "scaled_oxygen_mol_m3": 0.015316359018032405
+    },
+    {
+      "radius_um": 96.5625,
+      "baseline_oxygen_mol_m3": 0.015643813313133637,
+      "scaled_oxygen_mol_m3": 0.015643813313133637
+    },
+    {
+      "radius_um": 98.4375,
+      "baseline_oxygen_mol_m3": 0.015979831320528735,
+      "scaled_oxygen_mol_m3": 0.015979831320528735
+    },
+    {
+      "radius_um": 100.31250000000001,
+      "baseline_oxygen_mol_m3": 0.016324507707129527,
+      "scaled_oxygen_mol_m3": 0.016324507707129527
+    },
+    {
+      "radius_um": 102.1875,
+      "baseline_oxygen_mol_m3": 0.016677936567192634,
+      "scaled_oxygen_mol_m3": 0.016677936567192634
+    },
+    {
+      "radius_um": 104.06250000000001,
+      "baseline_oxygen_mol_m3": 0.017040211348000094,
+      "scaled_oxygen_mol_m3": 0.017040211348000094
+    },
+    {
+      "radius_um": 105.9375,
+      "baseline_oxygen_mol_m3": 0.017411424778767268,
+      "scaled_oxygen_mol_m3": 0.017411424778767268
+    },
+    {
+      "radius_um": 107.8125,
+      "baseline_oxygen_mol_m3": 0.017791668802845505,
+      "scaled_oxygen_mol_m3": 0.017791668802845505
+    },
+    {
+      "radius_um": 109.68750000000001,
+      "baseline_oxygen_mol_m3": 0.018181034513273398,
+      "scaled_oxygen_mol_m3": 0.018181034513273398
+    },
+    {
+      "radius_um": 111.5625,
+      "baseline_oxygen_mol_m3": 0.018579612091717043,
+      "scaled_oxygen_mol_m3": 0.018579612091717043
+    },
+    {
+      "radius_um": 113.43750000000001,
+      "baseline_oxygen_mol_m3": 0.018987490750826508,
+      "scaled_oxygen_mol_m3": 0.018987490750826508
+    },
+    {
+      "radius_um": 115.3125,
+      "baseline_oxygen_mol_m3": 0.019404758680022925,
+      "scaled_oxygen_mol_m3": 0.019404758680022925
+    },
+    {
+      "radius_um": 117.1875,
+      "baseline_oxygen_mol_m3": 0.019831502994718257,
+      "scaled_oxygen_mol_m3": 0.019831502994718257
+    },
+    {
+      "radius_um": 119.06250000000001,
+      "baseline_oxygen_mol_m3": 0.020267809688957916,
+      "scaled_oxygen_mol_m3": 0.020267809688957916
+    },
+    {
+      "radius_um": 120.9375,
+      "baseline_oxygen_mol_m3": 0.020713763591465147,
+      "scaled_oxygen_mol_m3": 0.020713763591465147
+    },
+    {
+      "radius_um": 122.81250000000001,
+      "baseline_oxygen_mol_m3": 0.021169448325055337,
+      "scaled_oxygen_mol_m3": 0.021169448325055337
+    },
+    {
+      "radius_um": 124.6875,
+      "baseline_oxygen_mol_m3": 0.021634946269378445,
+      "scaled_oxygen_mol_m3": 0.021634946269378445
+    },
+    {
+      "radius_um": 126.5625,
+      "baseline_oxygen_mol_m3": 0.022110338526938233,
+      "scaled_oxygen_mol_m3": 0.022110338526938233
+    },
+    {
+      "radius_um": 128.4375,
+      "baseline_oxygen_mol_m3": 0.02259570489232851,
+      "scaled_oxygen_mol_m3": 0.02259570489232851
+    },
+    {
+      "radius_um": 130.3125,
+      "baseline_oxygen_mol_m3": 0.023091123824618465,
+      "scaled_oxygen_mol_m3": 0.023091123824618465
+    },
+    {
+      "radius_um": 132.1875,
+      "baseline_oxygen_mol_m3": 0.02359667242281202,
+      "scaled_oxygen_mol_m3": 0.02359667242281202
+    },
+    {
+      "radius_um": 134.0625,
+      "baseline_oxygen_mol_m3": 0.024112426404299704,
+      "scaled_oxygen_mol_m3": 0.024112426404299704
+    },
+    {
+      "radius_um": 135.9375,
+      "baseline_oxygen_mol_m3": 0.024638460086215674,
+      "scaled_oxygen_mol_m3": 0.024638460086215674
+    },
+    {
+      "radius_um": 137.8125,
+      "baseline_oxygen_mol_m3": 0.025174846369607536,
+      "scaled_oxygen_mol_m3": 0.025174846369607536
+    },
+    {
+      "radius_um": 139.6875,
+      "baseline_oxygen_mol_m3": 0.025721656726322335,
+      "scaled_oxygen_mol_m3": 0.025721656726322335
+    },
+    {
+      "radius_um": 141.5625,
+      "baseline_oxygen_mol_m3": 0.02627896118850829,
+      "scaled_oxygen_mol_m3": 0.02627896118850829
+    },
+    {
+      "radius_um": 143.4375,
+      "baseline_oxygen_mol_m3": 0.02684682834062901,
+      "scaled_oxygen_mol_m3": 0.02684682834062901
+    },
+    {
+      "radius_um": 145.3125,
+      "baseline_oxygen_mol_m3": 0.027425325313884592,
+      "scaled_oxygen_mol_m3": 0.027425325313884592
+    },
+    {
+      "radius_um": 147.1875,
+      "baseline_oxygen_mol_m3": 0.028014517782932086,
+      "scaled_oxygen_mol_m3": 0.028014517782932086
+    },
+    {
+      "radius_um": 149.0625,
+      "baseline_oxygen_mol_m3": 0.028614469964796885,
+      "scaled_oxygen_mol_m3": 0.028614469964796885
+    },
+    {
+      "radius_um": 150.9375,
+      "baseline_oxygen_mol_m3": 0.029225244619865864,
+      "scaled_oxygen_mol_m3": 0.029225244619865864
+    },
+    {
+      "radius_um": 152.8125,
+      "baseline_oxygen_mol_m3": 0.029846903054852977,
+      "scaled_oxygen_mol_m3": 0.029846903054852977
+    },
+    {
+      "radius_um": 154.6875,
+      "baseline_oxygen_mol_m3": 0.030479505127628443,
+      "scaled_oxygen_mol_m3": 0.030479505127628443
+    },
+    {
+      "radius_um": 156.56250000000003,
+      "baseline_oxygen_mol_m3": 0.031123109253803447,
+      "scaled_oxygen_mol_m3": 0.031123109253803447
+    },
+    {
+      "radius_um": 158.4375,
+      "baseline_oxygen_mol_m3": 0.031777772414963386,
+      "scaled_oxygen_mol_m3": 0.031777772414963386
+    },
+    {
+      "radius_um": 160.3125,
+      "baseline_oxygen_mol_m3": 0.03244355016844449,
+      "scaled_oxygen_mol_m3": 0.03244355016844449
+    },
+    {
+      "radius_um": 162.1875,
+      "baseline_oxygen_mol_m3": 0.03312049665855018,
+      "scaled_oxygen_mol_m3": 0.03312049665855018
+    },
+    {
+      "radius_um": 164.0625,
+      "baseline_oxygen_mol_m3": 0.033808664629106096,
+      "scaled_oxygen_mol_m3": 0.033808664629106096
+    },
+    {
+      "radius_um": 165.93750000000003,
+      "baseline_oxygen_mol_m3": 0.03450810543725479,
+      "scaled_oxygen_mol_m3": 0.03450810543725479
+    },
+    {
+      "radius_um": 167.8125,
+      "baseline_oxygen_mol_m3": 0.03521886906839408,
+      "scaled_oxygen_mol_m3": 0.03521886906839408
+    },
+    {
+      "radius_um": 169.6875,
+      "baseline_oxygen_mol_m3": 0.035941004152165626,
+      "scaled_oxygen_mol_m3": 0.035941004152165626
+    },
+    {
+      "radius_um": 171.5625,
+      "baseline_oxygen_mol_m3": 0.03667455797940339,
+      "scaled_oxygen_mol_m3": 0.03667455797940339
+    },
+    {
+      "radius_um": 173.4375,
+      "baseline_oxygen_mol_m3": 0.03741957651995497,
+      "scaled_oxygen_mol_m3": 0.03741957651995497
+    },
+    {
+      "radius_um": 175.31250000000003,
+      "baseline_oxygen_mol_m3": 0.038176104441291686,
+      "scaled_oxygen_mol_m3": 0.038176104441291686
+    },
+    {
+      "radius_um": 177.1875,
+      "baseline_oxygen_mol_m3": 0.03894418512782683,
+      "scaled_oxygen_mol_m3": 0.03894418512782683
+    },
+    {
+      "radius_um": 179.0625,
+      "baseline_oxygen_mol_m3": 0.03972386070086505,
+      "scaled_oxygen_mol_m3": 0.03972386070086505
+    },
+    {
+      "radius_um": 180.93750000000003,
+      "baseline_oxygen_mol_m3": 0.04051517203910873,
+      "scaled_oxygen_mol_m3": 0.04051517203910873
+    },
+    {
+      "radius_um": 182.8125,
+      "baseline_oxygen_mol_m3": 0.04131815879965125,
+      "scaled_oxygen_mol_m3": 0.04131815879965125
+    },
+    {
+      "radius_um": 184.68750000000003,
+      "baseline_oxygen_mol_m3": 0.042132859439390054,
+      "scaled_oxygen_mol_m3": 0.042132859439390054
+    },
+    {
+      "radius_um": 186.5625,
+      "baseline_oxygen_mol_m3": 0.042959311236795965,
+      "scaled_oxygen_mol_m3": 0.042959311236795965
+    },
+    {
+      "radius_um": 188.4375,
+      "baseline_oxygen_mol_m3": 0.043797550313978584,
+      "scaled_oxygen_mol_m3": 0.043797550313978584
+    },
+    {
+      "radius_um": 190.31250000000003,
+      "baseline_oxygen_mol_m3": 0.04464761165899101,
+      "scaled_oxygen_mol_m3": 0.04464761165899101
+    },
+    {
+      "radius_um": 192.1875,
+      "baseline_oxygen_mol_m3": 0.04550952914832013,
+      "scaled_oxygen_mol_m3": 0.04550952914832013
+    },
+    {
+      "radius_um": 194.06250000000003,
+      "baseline_oxygen_mol_m3": 0.046383335569512296,
+      "scaled_oxygen_mol_m3": 0.046383335569512296
+    },
+    {
+      "radius_um": 195.9375,
+      "baseline_oxygen_mol_m3": 0.047269062643887014,
+      "scaled_oxygen_mol_m3": 0.047269062643887014
+    },
+    {
+      "radius_um": 197.8125,
+      "baseline_oxygen_mol_m3": 0.04816674104929444,
+      "scaled_oxygen_mol_m3": 0.04816674104929444
+    },
+    {
+      "radius_um": 199.68750000000003,
+      "baseline_oxygen_mol_m3": 0.049076400442875576,
+      "scaled_oxygen_mol_m3": 0.049076400442875576
+    },
+    {
+      "radius_um": 201.5625,
+      "baseline_oxygen_mol_m3": 0.0499980694837865,
+      "scaled_oxygen_mol_m3": 0.0499980694837865
+    },
+    {
+      "radius_um": 203.43750000000003,
+      "baseline_oxygen_mol_m3": 0.050931775855851284,
+      "scaled_oxygen_mol_m3": 0.050931775855851284
+    },
+    {
+      "radius_um": 205.3125,
+      "baseline_oxygen_mol_m3": 0.05187754629011032,
+      "scaled_oxygen_mol_m3": 0.05187754629011032
+    },
+    {
+      "radius_um": 207.1875,
+      "baseline_oxygen_mol_m3": 0.05283540658723397,
+      "scaled_oxygen_mol_m3": 0.05283540658723397
+    },
+    {
+      "radius_um": 209.06250000000003,
+      "baseline_oxygen_mol_m3": 0.05380538163977305,
+      "scaled_oxygen_mol_m3": 0.05380538163977305
+    },
+    {
+      "radius_um": 210.9375,
+      "baseline_oxygen_mol_m3": 0.05478749545422104,
+      "scaled_oxygen_mol_m3": 0.05478749545422104
+    },
+    {
+      "radius_um": 212.81250000000003,
+      "baseline_oxygen_mol_m3": 0.05578177117286415,
+      "scaled_oxygen_mol_m3": 0.05578177117286415
+    },
+    {
+      "radius_um": 214.6875,
+      "baseline_oxygen_mol_m3": 0.05678823109539819,
+      "scaled_oxygen_mol_m3": 0.05678823109539819
+    },
+    {
+      "radius_um": 216.5625,
+      "baseline_oxygen_mol_m3": 0.057806896700292855,
+      "scaled_oxygen_mol_m3": 0.057806896700292855
+    },
+    {
+      "radius_um": 218.43750000000003,
+      "baseline_oxygen_mol_m3": 0.05883778866588607,
+      "scaled_oxygen_mol_m3": 0.05883778866588607
+    },
+    {
+      "radius_um": 220.3125,
+      "baseline_oxygen_mol_m3": 0.05988092689119284,
+      "scaled_oxygen_mol_m3": 0.05988092689119284
+    },
+    {
+      "radius_um": 222.18750000000003,
+      "baseline_oxygen_mol_m3": 0.06093633051641478,
+      "scaled_oxygen_mol_m3": 0.06093633051641478
+    },
+    {
+      "radius_um": 224.0625,
+      "baseline_oxygen_mol_m3": 0.06200401794313807,
+      "scaled_oxygen_mol_m3": 0.06200401794313807
+    },
+    {
+      "radius_um": 225.9375,
+      "baseline_oxygen_mol_m3": 0.06308400685420908,
+      "scaled_oxygen_mol_m3": 0.06308400685420908
+    },
+    {
+      "radius_um": 227.81250000000003,
+      "baseline_oxygen_mol_m3": 0.0641763142332785,
+      "scaled_oxygen_mol_m3": 0.0641763142332785
+    },
+    {
+      "radius_um": 229.6875,
+      "baseline_oxygen_mol_m3": 0.06528095638400597,
+      "scaled_oxygen_mol_m3": 0.06528095638400597
+    },
+    {
+      "radius_um": 231.56250000000003,
+      "baseline_oxygen_mol_m3": 0.06639794894891844,
+      "scaled_oxygen_mol_m3": 0.06639794894891844
+    },
+    {
+      "radius_um": 233.4375,
+      "baseline_oxygen_mol_m3": 0.06752730692791695,
+      "scaled_oxygen_mol_m3": 0.06752730692791695
+    },
+    {
+      "radius_um": 235.3125,
+      "baseline_oxygen_mol_m3": 0.0686690446964271,
+      "scaled_oxygen_mol_m3": 0.0686690446964271
+    },
+    {
+      "radius_um": 237.18750000000003,
+      "baseline_oxygen_mol_m3": 0.06982317602319021,
+      "scaled_oxygen_mol_m3": 0.06982317602319021
+    },
+    {
+      "radius_um": 239.0625,
+      "baseline_oxygen_mol_m3": 0.07098971408769236,
+      "scaled_oxygen_mol_m3": 0.07098971408769236
+    },
+    {
+      "radius_um": 240.93750000000003,
+      "baseline_oxygen_mol_m3": 0.07216867149722973,
+      "scaled_oxygen_mol_m3": 0.07216867149722973
+    },
+    {
+      "radius_um": 242.8125,
+      "baseline_oxygen_mol_m3": 0.07336006030360985,
+      "scaled_oxygen_mol_m3": 0.07336006030360985
+    },
+    {
+      "radius_um": 244.6875,
+      "baseline_oxygen_mol_m3": 0.07456389201948821,
+      "scaled_oxygen_mol_m3": 0.07456389201948821
+    },
+    {
+      "radius_um": 246.56250000000003,
+      "baseline_oxygen_mol_m3": 0.07578017763434114,
+      "scaled_oxygen_mol_m3": 0.07578017763434114
+    },
+    {
+      "radius_um": 248.4375,
+      "baseline_oxygen_mol_m3": 0.07700892763007637,
+      "scaled_oxygen_mol_m3": 0.07700892763007637
+    },
+    {
+      "radius_um": 250.31250000000003,
+      "baseline_oxygen_mol_m3": 0.07825015199628273,
+      "scaled_oxygen_mol_m3": 0.07825015199628273
+    },
+    {
+      "radius_um": 252.1875,
+      "baseline_oxygen_mol_m3": 0.07950386024512181,
+      "scaled_oxygen_mol_m3": 0.07950386024512181
+    },
+    {
+      "radius_um": 254.0625,
+      "baseline_oxygen_mol_m3": 0.08077006142586406,
+      "scaled_oxygen_mol_m3": 0.08077006142586406
+    },
+    {
+      "radius_um": 255.93750000000003,
+      "baseline_oxygen_mol_m3": 0.0820487641390728,
+      "scaled_oxygen_mol_m3": 0.0820487641390728
+    },
+    {
+      "radius_um": 257.8125,
+      "baseline_oxygen_mol_m3": 0.08333997655043998,
+      "scaled_oxygen_mol_m3": 0.08333997655043998
+    },
+    {
+      "radius_um": 259.6875,
+      "baseline_oxygen_mol_m3": 0.08464370640427715,
+      "scaled_oxygen_mol_m3": 0.08464370640427715
+    },
+    {
+      "radius_um": 261.5625,
+      "baseline_oxygen_mol_m3": 0.08595996103666666,
+      "scaled_oxygen_mol_m3": 0.08595996103666666
+    },
+    {
+      "radius_um": 263.4375,
+      "baseline_oxygen_mol_m3": 0.0872887473882773,
+      "scaled_oxygen_mol_m3": 0.0872887473882773
+    },
+    {
+      "radius_um": 265.31250000000006,
+      "baseline_oxygen_mol_m3": 0.08863007201684926,
+      "scaled_oxygen_mol_m3": 0.08863007201684926
+    },
+    {
+      "radius_um": 267.1875,
+      "baseline_oxygen_mol_m3": 0.08998394110935361,
+      "scaled_oxygen_mol_m3": 0.08998394110935361
+    },
+    {
+      "radius_um": 269.0625,
+      "baseline_oxygen_mol_m3": 0.09135036049383144,
+      "scaled_oxygen_mol_m3": 0.09135036049383144
+    },
+    {
+      "radius_um": 270.9375,
+      "baseline_oxygen_mol_m3": 0.09272933565091818,
+      "scaled_oxygen_mol_m3": 0.09272933565091818
+    },
+    {
+      "radius_um": 272.8125,
+      "baseline_oxygen_mol_m3": 0.09412087172505866,
+      "scaled_oxygen_mol_m3": 0.09412087172505866
+    },
+    {
+      "radius_um": 274.68750000000006,
+      "baseline_oxygen_mol_m3": 0.09552497353541832,
+      "scaled_oxygen_mol_m3": 0.09552497353541832
+    },
+    {
+      "radius_um": 276.5625,
+      "baseline_oxygen_mol_m3": 0.09694164558649675,
+      "scaled_oxygen_mol_m3": 0.09694164558649675
+    },
+    {
+      "radius_um": 278.4375,
+      "baseline_oxygen_mol_m3": 0.09837089207844904,
+      "scaled_oxygen_mol_m3": 0.09837089207844904
+    },
+    {
+      "radius_um": 280.3125,
+      "baseline_oxygen_mol_m3": 0.099812716917121,
+      "scaled_oxygen_mol_m3": 0.099812716917121
+    },
+    {
+      "radius_um": 282.1875,
+      "baseline_oxygen_mol_m3": 0.10126712372380407,
+      "scaled_oxygen_mol_m3": 0.10126712372380407
+    },
+    {
+      "radius_um": 284.06250000000006,
+      "baseline_oxygen_mol_m3": 0.10273411584471599,
+      "scaled_oxygen_mol_m3": 0.10273411584471599
+    },
+    {
+      "radius_um": 285.9375,
+      "baseline_oxygen_mol_m3": 0.104213696360213,
+      "scaled_oxygen_mol_m3": 0.104213696360213
+    },
+    {
+      "radius_um": 287.8125,
+      "baseline_oxygen_mol_m3": 0.10570586809373982,
+      "scaled_oxygen_mol_m3": 0.10570586809373982
+    },
+    {
+      "radius_um": 289.6875,
+      "baseline_oxygen_mol_m3": 0.1072106336205228,
+      "scaled_oxygen_mol_m3": 0.1072106336205228
+    },
+    {
+      "radius_um": 291.5625,
+      "baseline_oxygen_mol_m3": 0.10872799527601291,
+      "scaled_oxygen_mol_m3": 0.10872799527601291
+    },
+    {
+      "radius_um": 293.43750000000006,
+      "baseline_oxygen_mol_m3": 0.11025795516408377,
+      "scaled_oxygen_mol_m3": 0.11025795516408377
+    },
+    {
+      "radius_um": 295.3125,
+      "baseline_oxygen_mol_m3": 0.11180051516499082,
+      "scaled_oxygen_mol_m3": 0.11180051516499082
+    },
+    {
+      "radius_um": 297.1875,
+      "baseline_oxygen_mol_m3": 0.11335567694309741,
+      "scaled_oxygen_mol_m3": 0.11335567694309741
+    },
+    {
+      "radius_um": 299.0625,
+      "baseline_oxygen_mol_m3": 0.11492344195437365,
+      "scaled_oxygen_mol_m3": 0.11492344195437365
+    }
+  ],
+  "model_fitted": false,
+  "biological_validation_performed": false,
+  "limits": [
+    "For the same geometry, bath, uptake law, Km, initial profile and dimensionless time grid, jointly scaling diffusivity, maximal uptake and finite surface transfer (when present) preserves the backward-Euler transient concentration path when physical time is divided by that factor; a fixed-surface boundary remains fixed.",
+    "The characteristic diffusion scale R\u00b2/D and model-derived core-change times scale inversely with the rate factor. These are mathematical model times, not measured equilibration or biological response times.",
+    "Absolute uptake and surface influx scale with the rate factor at matched states; mass-balance checks are reported separately for both integrations.",
+    "No measurements were fitted. The constructed symmetry establishes no organoid-specific rates, oxygen response, viability, culture recommendation or biological validation."
+  ]
+}

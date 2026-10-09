@@ -27,6 +27,8 @@ Numerical verification includes conservation, analytic convergence, positivity,
 monotonicity and comparison to an independent nonlinear boundary-value solver.
 Transient verification additionally compares early zero-uptake diffusion with
 an independent spherical series and checks first-order temporal refinement.
+It also tests the exact transient time rescaling produced by joint scaling of
+diffusivity, uptake and finite boundary transfer.
 Core-change timing is a numerical summary, not an assay response time. The
 `inverse-demo` workflow fits only an internally constructed synthetic profile
 from the same model family; it is not evidence of biological parameter recovery.

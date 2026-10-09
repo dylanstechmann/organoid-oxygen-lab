@@ -108,6 +108,23 @@ simulated horizon is null. A zero core difference gives zero core-change time;
 this does not imply that the entire initial profile was steady. These are
 numerical exposure summaries, not cell-survival or biological-response times.
 
+## Joint-rate transient symmetry
+
+At fixed geometry, bath, `Km`, uptake law and uniform initial condition, the
+dimensionless transient equation depends on the same rate groups as the steady
+model and on `tau = tD/R²`. Consequently, multiplying `D`, `Vmax` and a finite
+surface `k` by a common positive factor `a` preserves the concentration path at
+matched dimensionless time: `c_a(r, t/a) = c_1(r, t)`. The fixed-surface
+boundary condition also preserves this relation. Model-derived crossing times
+therefore divide by `a`, while uptake and influx at matched states multiply by
+`a`.
+
+`oxygenlab transient-equivalence-demo` exercises this exact relation using the
+existing backward-Euler solver and reports both runs' dynamic conservation
+errors. Its paired settings are constructed, not measured or fitted. This
+mathematical time scaling does not estimate a biological equilibration,
+exposure or response time.
+
 ## Local sensitivity and constructed inverse illustration
 
 `oxygenlab sensitivity` perturbs each positive parameter by a relative step in

@@ -24,6 +24,7 @@ from oxygenlab.model import (
     zero_order_analytic,
 )
 from oxygenlab.steady_equivalence import steady_equivalence
+from oxygenlab.transient_equivalence import transient_rate_equivalence
 
 
 @contextmanager
@@ -463,6 +464,106 @@ def equivalence_demo(output, parameters=None, rate_scale=2.0, *, plot=False):
     return report
 
 
+def transient_equivalence_demo(
+    output,
+    parameters=None,
+    rate_scale=2.0,
+    *,
+    total_time_s=1200.0,
+    time_steps=120,
+    initial_oxygen_mol_m3=0.0,
+    plot=False,
+):
+    """Publish the constructed transient time-scaling symmetry and diagnostics."""
+    report = transient_rate_equivalence(
+        parameters,
+        rate_scale=rate_scale,
+        total_time_s=total_time_s,
+        time_steps=time_steps,
+        initial_oxygen_mol_m3=initial_oxygen_mol_m3,
+    )
+    with _report_directory(output) as staged:
+        (staged / "transient_equivalence.json").write_text(
+            json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+        trajectory_fields = list(report["trajectory"][0])
+        with (staged / "matched_trajectories.csv").open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=trajectory_fields, lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(report["trajectory"])
+        profile_fields = list(report["final_matched_time_profiles"][0])
+        with (staged / "final_matched_profiles.csv").open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=profile_fields, lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(report["final_matched_time_profiles"])
+
+        t95 = report["time_to_95pct_core_change_s"]
+        rates = report["final_rate_outputs"]
+        balances = report["max_relative_transient_mass_balance_error"]
+        rate_change = (
+            "multiplies diffusivity, maximal uptake and finite surface transfer"
+            if report["baseline_parameters"]["transfer_m_s"] is not None
+            else "multiplies diffusivity and maximal uptake while retaining the fixed-surface boundary"
+        )
+        baseline_t95 = "not reached" if t95["baseline"] is None else f"{t95['baseline']:.6g}"
+        scaled_t95 = "not reached" if t95["scaled"] is None else f"{t95['scaled']:.6g}"
+        t95_ratio = "unavailable" if t95["baseline_over_scaled"] is None else f"{t95['baseline_over_scaled']:.6g}"
+        uptake_ratio = ("unavailable" if rates["uptake_scaled_over_baseline"] is None
+                        else f"{rates['uptake_scaled_over_baseline']:.6g}")
+        influx_ratio = ("unavailable" if rates["influx_scaled_over_baseline"] is None
+                        else f"{rates['influx_scaled_over_baseline']:.6g}")
+        lines = [
+            "# Illustrative transient rate-scaling symmetry", "",
+            "**Constructed numerical comparison only. No biological measurements were fitted.**", "",
+            f"The second parameter set {rate_change} by {rate_scale:g}; it divides simulated physical time by the same factor and keeps geometry, bath, Michaelis constant, uptake law and initial concentration fixed.", "",
+            "| Check | Result |", "|---|---:|",
+            f"| Maximum transient profile difference at matched dimensionless times (mol/m³) | {report['max_transient_profile_difference_mol_m3']:.6g} |",
+            f"| Maximum steady profile difference (mol/m³) | {report['max_steady_profile_difference_mol_m3']:.6g} |",
+            f"| Baseline 95% core-change time (s) | {baseline_t95} |",
+            f"| Scaled 95% core-change time (s) | {scaled_t95} |",
+            f"| Baseline/scaled 95% time ratio (expected {rate_scale:g}) | {t95_ratio} |",
+            f"| Uptake ratio at matched final state (scaled/baseline) | {uptake_ratio} |",
+            f"| Surface-influx ratio at matched final state (scaled/baseline) | {influx_ratio} |",
+            f"| Maximum relative transient mass-balance error, baseline | {balances['baseline']:.3g} |",
+            f"| Maximum relative transient mass-balance error, scaled | {balances['scaled']:.3g} |", "",
+            *report["limits"], "",
+        ]
+        if plot:
+            import matplotlib
+            matplotlib.use("Agg")
+            import matplotlib.pyplot as plt
+            fig, axes = plt.subplots(1, 2, figsize=(10, 4.5))
+            trajectory = report["trajectory"]
+            axes[0].plot([row["baseline_time_s"] for row in trajectory],
+                         [row["baseline_core_oxygen_mol_m3"] for row in trajectory],
+                         label="Baseline physical seconds", color="#2563eb")
+            axes[0].plot([row["scaled_time_s"] for row in trajectory],
+                         [row["scaled_core_oxygen_mol_m3"] for row in trajectory],
+                         label=f"Rates ×{rate_scale:g}; compressed seconds", color="#e11d48")
+            axes[0].set(xlabel="Model time (s)", ylabel="Sampled core oxygen (mol/m³)",
+                        title="Same path, different modeled seconds")
+            axes[0].grid(alpha=.25)
+            axes[0].legend()
+            axes[1].plot([row["dimensionless_time_tau"] for row in trajectory],
+                         [row["baseline_core_oxygen_mol_m3"] for row in trajectory],
+                         label="Baseline", color="#2563eb")
+            axes[1].plot([row["dimensionless_time_tau"] for row in trajectory],
+                         [row["scaled_core_oxygen_mol_m3"] for row in trajectory],
+                         "--", label="Rates scaled", color="#e11d48")
+            axes[1].set(xlabel="Dimensionless time τ = tD/R²", ylabel="Sampled core oxygen (mol/m³)",
+                        title="Trajectories overlap at matched τ")
+            axes[1].grid(alpha=.25)
+            axes[1].legend()
+            fig.suptitle("Illustrative model symmetry — no biological calibration")
+            fig.tight_layout()
+            try:
+                fig.savefig(staged / "transient_equivalence.png", dpi=160)
+            finally:
+                plt.close(fig)
+            lines += ["![Illustrative transient rate-scaling symmetry](transient_equivalence.png)", ""]
+        (staged / "REPORT.md").write_text("\n".join(lines), encoding="utf-8")
+    return report
+
+
 def constructed_inverse_demo(output, *, seed=0, measurement_sd_mol_m3=0.002):
     """Fit two parameters to a deliberately constructed synthetic radial profile."""
     from scipy.optimize import least_squares
@@ -700,6 +801,21 @@ def main(argv=None):
     equivalence.add_argument("--rate-scale", type=float, default=2.0, help="positive dimensionless factor for D, Vmax and finite k")
     equivalence.add_argument("--out", required=True)
     equivalence.add_argument("--plot", action="store_true")
+    transient_equivalence = commands.add_parser(
+        "transient-equivalence-demo",
+        help="compare constructed transient trajectories with jointly scaled rates",
+    )
+    transient_equivalence.add_argument("--config", default=None)
+    transient_equivalence.add_argument("--rate-scale", type=float, default=2.0,
+                                       help="positive factor applied to D, Vmax and finite surface transfer")
+    transient_equivalence.add_argument("--total-time-s", type=float, default=1200.0,
+                                       help="baseline model time horizon in seconds")
+    transient_equivalence.add_argument("--time-steps", type=int, default=120,
+                                       help="saved points per trajectory, including t=0")
+    transient_equivalence.add_argument("--initial-oxygen", type=float, default=0.0,
+                                       help="uniform initial oxygen in mol/m3")
+    transient_equivalence.add_argument("--out", required=True)
+    transient_equivalence.add_argument("--plot", action="store_true")
     inverse = commands.add_parser("inverse-demo", help="fit a deliberately constructed synthetic profile; not biological calibration")
     inverse.add_argument("--seed", type=int, default=0)
     inverse.add_argument("--measurement-sd", type=float, default=0.002, help="constructed noise SD in mol/m3")
@@ -763,6 +879,13 @@ def main(argv=None):
         elif args.command == "equivalence-demo":
             parameters = Parameters.from_json(args.config) if args.config else Parameters()
             report = equivalence_demo(args.out, parameters, rate_scale=args.rate_scale, plot=args.plot)
+        elif args.command == "transient-equivalence-demo":
+            parameters = Parameters.from_json(args.config) if args.config else Parameters()
+            report = transient_equivalence_demo(
+                args.out, parameters, rate_scale=args.rate_scale,
+                total_time_s=args.total_time_s, time_steps=args.time_steps,
+                initial_oxygen_mol_m3=args.initial_oxygen, plot=args.plot,
+            )
         elif args.command == "inverse-demo":
             report = constructed_inverse_demo(args.out, seed=args.seed,
                                                measurement_sd_mol_m3=args.measurement_sd)

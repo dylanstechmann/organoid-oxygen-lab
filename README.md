@@ -28,6 +28,14 @@ absolute rates. See [the illustrative report](examples/steady-equivalence/REPORT
 and [the derivation](docs/STEADY_EQUIVALENCE.md). This concerns jointly unknown
 parameters; an independently fixed diffusivity removes this particular family.
 
+`oxygenlab transient-equivalence-demo --out artifacts/transient-equivalence --plot`
+checks the matching transient symmetry. With the same initial profile, scaling
+diffusivity, uptake and (when finite) surface transfer by `a` compresses the model
+time axis by `a` while preserving the path at matched `tau = tD/R²`. The
+[constructed report](examples/transient-equivalence/REPORT.md) includes profile,
+time-grid and mass-balance checks. It is a numerical identity test, not a
+biological response-time estimate or fitted result.
+
 `oxygenlab sweep-km --out artifacts/km` changes only the illustrative Michaelis constant and reports the critical radius for each value. On the default parameters (2026-10-08 run) it rose from about 250 um at km 0.002 mol/m³ to about 375 um at 0.05, always above the zero-order analytic radius of about 244 um. This is a sensitivity grid, not a fit, and says nothing about measured km.
 
 `oxygenlab sweep-vmax` holds radius fixed and raises illustrative `vmax`. The question is only whether core oxygen falls and mass balance stays small. It is not a fitted uptake.
@@ -71,6 +79,7 @@ oxygenlab sensitivity --out artifacts/local-sensitivity
 oxygenlab inverse-demo --out artifacts/constructed-inverse --seed 4
 oxygenlab critical-radius --out artifacts/critical-radius
 oxygenlab transient --out artifacts/transient --total-time-s 1200 --time-steps 120 --plot
+oxygenlab transient-equivalence-demo --out artifacts/transient-equivalence --rate-scale 2 --plot
 oxygenlab solve examples/demo/parameters.json --out artifacts/sphere
 ```
 
