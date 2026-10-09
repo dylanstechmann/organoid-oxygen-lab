@@ -36,6 +36,8 @@ class MeasuredProfileTests(unittest.TestCase):
         self.assertEqual(report["n_biological_units"], 2)
         self.assertEqual(report["n_specimens"], 2)
         self.assertFalse(report["model_fitted"])
+        self.assertFalse(report["biological_validation_performed"])
+        self.assertEqual(report["profiles"][0]["sampled_oxygen_range_mol_m3"], [0.1, 0.2])
 
     def test_complete_declaration_does_not_hide_a_missing_center_sample(self):
         raw = self.csv.read_bytes().replace(b"a,0,0.1", b"a,20,0.1")
@@ -46,8 +48,6 @@ class MeasuredProfileTests(unittest.TestCase):
         self.assertFalse(profile["spatial_coverage"]["center_sample_present"])
         self.assertAlmostEqual(profile["spatial_coverage"]["inward_of_first_sample_sphere_volume_fraction"], .008)
         self.assertFalse(report["biological_validation_performed"])
-        self.assertFalse(report["biological_validation_performed"])
-        self.assertEqual(report["profiles"][0]["sampled_oxygen_range_mol_m3"], [0.1, 0.2])
 
     def test_rejects_averaged_synthetic_digitized_or_model_inferred_oxygen(self):
         for origin in ("synthetic", "figure_digitized", "averaged", "model_inferred"):
