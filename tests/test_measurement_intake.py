@@ -49,6 +49,18 @@ class MeasuredProfileTests(unittest.TestCase):
         self.assertAlmostEqual(profile["spatial_coverage"]["inward_of_first_sample_sphere_volume_fraction"], .008)
         self.assertFalse(report["biological_validation_performed"])
 
+    def test_uncertainty_is_optional_source_bound_and_not_propagated(self):
+        report = self.qualify()
+        self.assertIsNone(report["profiles"][0]["measurement_uncertainty"]["quantities"]["oxygen"]["value"])
+        self.document["specimens"]["a"]["measurement_uncertainty"] = {"oxygen": {
+            "kind": "absolute_bound", "value": .003, "unit": "mol/m3", "source_file": "native",
+            "source_record": "fixture only", "scope": "Declared sensor bound in constructed fixture"}}
+        report = self.qualify()
+        uncertainty = report["profiles"][0]["measurement_uncertainty"]
+        self.assertEqual(uncertainty["quantities"]["oxygen"]["value"], .003)
+        self.assertFalse(uncertainty["propagated_to_model"])
+        self.assertFalse(report["model_fitted"])
+
     def test_rejects_averaged_synthetic_digitized_or_model_inferred_oxygen(self):
         for origin in ("synthetic", "figure_digitized", "averaged", "model_inferred"):
             document = copy.deepcopy(self.document); document["origin"] = origin

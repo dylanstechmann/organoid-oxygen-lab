@@ -5,8 +5,10 @@ import hashlib
 import io
 import json
 import math
+from itertools import pairwise
 from pathlib import Path
 
+from oxygenlab.measurement_uncertainty import uncertainty_declarations
 from oxygenlab.spatial_coverage import radial_coverage
 
 
@@ -94,7 +96,7 @@ def qualify_profiles(csv_path, manifest_path):
     for specimen_id, points in profiles.items():
         record = specimens[specimen_id]
         if not isinstance(record, dict):
-            raise ValueError(f"invalid specimen record: {specimen_id}")
+            raise ValueError(f"invalid specimen record: {specimen_id}")  # noqa: TRY004 -- external manifest validation
         for key in ("original_specimen_id", "biological_unit_id", "source_trace_id", "biological_identity_record", "sensor_calibration_record", "radius_measurement_record", "bath_measurement_record", "steady_state_record", "cell_type", "culture_conditions"):
             _text(record, key)
         if record.get("geometry") != "sphere" or record.get("steady_state") is not True or record.get("complete_profile") is not True:
@@ -121,13 +123,14 @@ def qualify_profiles(csv_path, manifest_path):
         specimen_radius = _number(record, "specimen_radius_um")
         bath = _number(record, "bath_oxygen_mol_m3")
         radii = [point[0] for point in points]
-        if specimen_radius <= 0 or bath <= 0 or len(points) < 3 or max(radii) > specimen_radius or any(b <= a for a, b in zip(radii, radii[1:])):
+        if specimen_radius <= 0 or bath <= 0 or len(points) < 3 or max(radii) > specimen_radius or any(b <= a for a, b in pairwise(radii)):
             raise ValueError("profile needs >=3 strictly increasing radii inside positive measured specimen radius and positive bath oxygen")
         summary.append({"specimen_id": specimen_id, "biological_unit_id": biological_id, "role": role,
                         "n_points": len(points), "specimen_radius_um": specimen_radius,
                         "bath_oxygen_mol_m3": bath, "sampled_radius_um": [radii[0], radii[-1]],
                         "sampled_oxygen_range_mol_m3": [min(c for _, c in points), max(c for _, c in points)],
-                        "spatial_coverage": radial_coverage(radii, specimen_radius)})
+                        "spatial_coverage": radial_coverage(radii, specimen_radius),
+                        "measurement_uncertainty": uncertainty_declarations(record, verified)})
     if set(biological_roles.values()) != {"calibration", "validation"}:
         raise ValueError("independent calibration and held-out validation biological units required")
     return {"schema_version": 1, "status": "qualified_declared_profiles_for_future_comparison",
@@ -139,5 +142,5 @@ def qualify_profiles(csv_path, manifest_path):
             "model_fitted": False, "biological_validation_performed": False,
             "limits": ["Intake checks declared source identity and units; it cannot authenticate measurements or prove spherical homogeneity.",
                        "No oxygen model has been fitted or scored against these profiles.",
-                       "Parameter identifiability and measurement uncertainty need separate analysis.",
+                       "Uncertainty declarations are retained, not authenticated or propagated. Parameter identifiability needs separate analysis.",
                        "Complete-profile declarations do not prove spatial completeness: inspect center/surface sampling and gaps. Geometric span fractions are not measured oxygen-volume fractions."]}

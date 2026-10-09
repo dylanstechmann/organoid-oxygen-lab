@@ -16,6 +16,11 @@ intake now reports center/surface sampling, radial gaps and the geometric
 regions outside the sample span. A declaration of a complete profile does not
 itself establish spatial completeness. See [the constructed example](examples/spatial-coverage/REPORT.md).
 
+Intake also retains [source-declared uncertainty](docs/MEASUREMENT_UNCERTAINTY.md)
+for measured radius, position, oxygen and bath oxygen. Missing declarations stay
+unknown; SD, uncertainty and bounds keep their stated meanings. These annotations
+are not converted into confidence intervals or propagated into the model.
+
 `oxygenlab sweep-km --out artifacts/km` changes only the illustrative Michaelis constant and reports the critical radius for each value. On the default parameters (2026-10-08 run) it rose from about 250 um at km 0.002 mol/m³ to about 375 um at 0.05, always above the zero-order analytic radius of about 244 um. This is a sensitivity grid, not a fit, and says nothing about measured km.
 
 `oxygenlab sweep-vmax` holds radius fixed and raises illustrative `vmax`. The question is only whether core oxygen falls and mass balance stays small. It is not a fitted uptake.
