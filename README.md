@@ -21,6 +21,13 @@ for measured radius, position, oxygen and bath oxygen. Missing declarations stay
 unknown; SD, uncertainty and bounds keep their stated meanings. These annotations
 are not converted into confidence intervals or propagated into the model.
 
+`oxygenlab equivalence-demo --out artifacts/steady-equivalence --plot` shows a
+structural ambiguity: scaling diffusivity, maximal uptake and finite surface
+transfer together gives the same steady concentration profile with different
+absolute rates. See [the illustrative report](examples/steady-equivalence/REPORT.md)
+and [the derivation](docs/STEADY_EQUIVALENCE.md). This concerns jointly unknown
+parameters; an independently fixed diffusivity removes this particular family.
+
 `oxygenlab sweep-km --out artifacts/km` changes only the illustrative Michaelis constant and reports the critical radius for each value. On the default parameters (2026-10-08 run) it rose from about 250 um at km 0.002 mol/m³ to about 375 um at 0.05, always above the zero-order analytic radius of about 244 um. This is a sensitivity grid, not a fit, and says nothing about measured km.
 
 `oxygenlab sweep-vmax` holds radius fixed and raises illustrative `vmax`. The question is only whether core oxygen falls and mass balance stays small. It is not a fitted uptake.

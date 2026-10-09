@@ -1,15 +1,15 @@
 """Configuration-driven numerical experiments and reproducible reports."""
 
 import argparse
-from contextlib import contextmanager
 import csv
-from dataclasses import asdict, replace
 import hashlib
 import json
 import math
-from pathlib import Path
 import platform
 import shutil
+from contextlib import contextmanager
+from dataclasses import asdict, replace
+from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import numpy as np
@@ -23,6 +23,7 @@ from oxygenlab.model import (
     solve_transient,
     zero_order_analytic,
 )
+from oxygenlab.steady_equivalence import steady_equivalence
 
 
 @contextmanager
@@ -430,6 +431,38 @@ def local_sensitivity(output, parameters=None, relative_step=0.02):
     return report
 
 
+def equivalence_demo(output, parameters=None, rate_scale=2.0, *, plot=False):
+    """Publish an inspectable steady-model ambiguity with optional illustrative plot."""
+    report = steady_equivalence(parameters, rate_scale)
+    with _report_directory(output) as staged:
+        (staged / "equivalence.json").write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+        with (staged / "profiles.csv").open("w", encoding="utf-8", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=list(report["profiles"][0]), lineterminator="\n")
+            writer.writeheader(); writer.writerows(report["profiles"])
+        lines = ["# Illustrative steady-profile equivalence", "", "Constructed model settings; no measurements fitted.", "",
+                 f"D, Vmax and finite k scaled together by {rate_scale:g}.",
+                 f"Maximum profile difference: {report['max_profile_difference_mol_m3']:.6g} mol/m3.", "", *report["limits"]]
+        if plot:
+            import matplotlib.pyplot as plt
+            fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+            rows = report["profiles"]
+            for label, style in (("baseline", "-"), ("scaled", "--")):
+                axes[0].plot([row["radius_um"] for row in rows], [row[label + "_oxygen_mol_m3"] for row in rows], style, label=label)
+            axes[0].set(xlabel="Radius (um)", ylabel="Oxygen (mol/m³)", title="Steady profiles overlap")
+            axes[0].legend(); axes[0].grid(alpha=.2)
+            axes[1].bar(["baseline", "scaled"], [report["rate_outputs"][label]["total_uptake_mol_s"] for label in ("baseline", "scaled")])
+            axes[1].set(ylabel="Total uptake (mol/s)", title="Absolute rates differ")
+            fig.suptitle("Illustrative model symmetry — no biological calibration")
+            fig.tight_layout()
+            try:
+                fig.savefig(staged / "equivalence.png", dpi=160)
+            finally:
+                plt.close(fig)
+            lines += ["", "![Illustrative steady-profile equivalence](equivalence.png)"]
+        (staged / "REPORT.md").write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+    return report
+
+
 def constructed_inverse_demo(output, *, seed=0, measurement_sd_mol_m3=0.002):
     """Fit two parameters to a deliberately constructed synthetic radial profile."""
     from scipy.optimize import least_squares
@@ -662,6 +695,11 @@ def main(argv=None):
     sensitivity.add_argument("--config", default=None, help="optional JSON parameter configuration")
     sensitivity.add_argument("--relative-step", type=float, default=0.02)
     sensitivity.add_argument("--out", required=True)
+    equivalence = commands.add_parser("equivalence-demo", help="constructed steady profiles with different absolute rates")
+    equivalence.add_argument("--config", default=None)
+    equivalence.add_argument("--rate-scale", type=float, default=2.0, help="positive dimensionless factor for D, Vmax and finite k")
+    equivalence.add_argument("--out", required=True)
+    equivalence.add_argument("--plot", action="store_true")
     inverse = commands.add_parser("inverse-demo", help="fit a deliberately constructed synthetic profile; not biological calibration")
     inverse.add_argument("--seed", type=int, default=0)
     inverse.add_argument("--measurement-sd", type=float, default=0.002, help="constructed noise SD in mol/m3")
@@ -722,6 +760,9 @@ def main(argv=None):
             else:
                 parameters = Parameters()
             report = local_sensitivity(args.out, parameters, relative_step=args.relative_step)
+        elif args.command == "equivalence-demo":
+            parameters = Parameters.from_json(args.config) if args.config else Parameters()
+            report = equivalence_demo(args.out, parameters, rate_scale=args.rate_scale, plot=args.plot)
         elif args.command == "inverse-demo":
             report = constructed_inverse_demo(args.out, seed=args.seed,
                                                measurement_sd_mol_m3=args.measurement_sd)
