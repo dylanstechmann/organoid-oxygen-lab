@@ -645,6 +645,8 @@ def main(argv=None):
     qualify.add_argument("csv")
     qualify.add_argument("manifest")
     qualify.add_argument("--out", required=True)
+    coverage = commands.add_parser("coverage-demo", help="constructed radial sampling contrast; no oxygen inferred")
+    coverage.add_argument("--out", required=True)
     d = commands.add_parser("demo", help="illustrative size sweep and analytic convergence checks")
     d.add_argument("--out", required=True); d.add_argument("--plot", action="store_true")
     s = commands.add_parser("solve", help="solve one JSON parameter configuration")
@@ -681,7 +683,21 @@ def main(argv=None):
     trans.add_argument("--plot", action="store_true", help="generate transient ramp plot")
     args = parser.parse_args(argv)
     try:
-        if args.command == "qualify-profiles":
+        if args.command == "coverage-demo":
+            from oxygenlab.spatial_coverage import radial_coverage
+            report = {"schema_version": 1, "origin": "constructed_sampling_geometry_only",
+                      "specimen_radius_um": 100.0,
+                      "cases": [{"id": name, "sample_radii_um": radii, "spatial_coverage": radial_coverage(radii, 100.0)}
+                                for name, radii in [("interior_only", [20.0, 50.0, 80.0]), ("endpoints_present", [0.0, 50.0, 100.0])]],
+                      "biological_data_used": False, "oxygen_or_viability_inferred": False}
+            with _report_directory(args.out) as staged:
+                (staged / "coverage.json").write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+                lines = ["# Constructed radial sampling geometry", "", "Illustrative geometry only; no oxygen or biological data are supplied.", "",
+                         "At a declared radius of 100 um, samples at 20, 50 and 80 um leave 0.8% of the spherical volume inward of the first radius and 48.8% outward of the last radius.",
+                         "These are geometric regions outside the span, not measured oxygen-volume fractions. Adding center/surface points makes those outer regions zero but still leaves unsampled locations between the points.", "",
+                         "The largest internal radial gap is 30% of radius in the first case and 50% in the endpoint case. Neither number is an assay-adequacy threshold.", ""]
+                (staged / "REPORT.md").write_text("\n".join(lines), encoding="utf-8")
+        elif args.command == "qualify-profiles":
             from oxygenlab.measurement_intake import qualify_profiles
             report = qualify_profiles(args.csv, args.manifest)
             with _report_directory(args.out) as staged:

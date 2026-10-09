@@ -36,6 +36,16 @@ class MeasuredProfileTests(unittest.TestCase):
         self.assertEqual(report["n_biological_units"], 2)
         self.assertEqual(report["n_specimens"], 2)
         self.assertFalse(report["model_fitted"])
+
+    def test_complete_declaration_does_not_hide_a_missing_center_sample(self):
+        raw = self.csv.read_bytes().replace(b"a,0,0.1", b"a,20,0.1")
+        self.csv.write_bytes(raw)
+        self.document["csv_sha256"] = hashlib.sha256(raw).hexdigest()
+        report = self.qualify()
+        profile = next(p for p in report["profiles"] if p["specimen_id"] == "a")
+        self.assertFalse(profile["spatial_coverage"]["center_sample_present"])
+        self.assertAlmostEqual(profile["spatial_coverage"]["inward_of_first_sample_sphere_volume_fraction"], .008)
+        self.assertFalse(report["biological_validation_performed"])
         self.assertFalse(report["biological_validation_performed"])
         self.assertEqual(report["profiles"][0]["sampled_oxygen_range_mol_m3"], [0.1, 0.2])
 

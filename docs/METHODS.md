@@ -47,6 +47,18 @@ That piecewise-constant estimate changes discretely as shells cross the
 threshold. Refine the mesh before interpreting a near-threshold volume fraction.
 The minimum sampled concentration is at R/(2N), not exactly at the center.
 
+## Source-profile spatial coverage
+
+Measurement intake reports radial sample endpoints as fractions of measured
+specimen radius. For a declared sphere, the region inward of the first radius
+has fraction `(r_first/R)^3`, and the region outward of the last has fraction
+`1-(r_last/R)^3`. These geometric regions are not measured oxygen-volume
+fractions, and point measurements do not fill the intervals between them.
+The largest internal gap is reported relative to radius without an adequacy
+cutoff. Missing center or surface points remain visible even when the source
+declares `complete_profile`. No threshold, solver, fit or uncertainty model is
+changed by these diagnostics.
+
 ## Independent references
 
 For uniform constant uptake q, the exact concentration is

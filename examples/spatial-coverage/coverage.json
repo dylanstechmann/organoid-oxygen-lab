@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "origin": "constructed_sampling_geometry_only",
+  "specimen_radius_um": 100.0,
+  "cases": [
+    {
+      "id": "interior_only",
+      "sample_radii_um": [
+        20.0,
+        50.0,
+        80.0
+      ],
+      "spatial_coverage": {
+        "radial_span_fraction": [
+          0.2,
+          0.8
+        ],
+        "center_sample_present": false,
+        "surface_sample_present": false,
+        "inward_of_first_sample_sphere_volume_fraction": 0.008000000000000002,
+        "outward_of_last_sample_sphere_volume_fraction": 0.4879999999999999,
+        "largest_internal_radial_gap_fraction": 0.30000000000000004,
+        "interpretation": "Volume fractions are geometric regions outside the radial sample span in a declared sphere, not directly measured tissue volumes. Point samples do not measure every location between them; no oxygen, viability or minimum sampling adequacy is inferred."
+      }
+    },
+    {
+      "id": "endpoints_present",
+      "sample_radii_um": [
+        0.0,
+        50.0,
+        100.0
+      ],
+      "spatial_coverage": {
+        "radial_span_fraction": [
+          0.0,
+          1.0
+        ],
+        "center_sample_present": true,
+        "surface_sample_present": true,
+        "inward_of_first_sample_sphere_volume_fraction": 0.0,
+        "outward_of_last_sample_sphere_volume_fraction": 0.0,
+        "largest_internal_radial_gap_fraction": 0.5,
+        "interpretation": "Volume fractions are geometric regions outside the radial sample span in a declared sphere, not directly measured tissue volumes. Point samples do not measure every location between them; no oxygen, viability or minimum sampling adequacy is inferred."
+      }
+    }
+  ],
+  "biological_data_used": false,
+  "oxygen_or_viability_inferred": false
+}
