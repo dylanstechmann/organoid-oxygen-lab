@@ -72,6 +72,25 @@ class MeasuredProfileTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "both calibration and validation"):
             self.qualify(document)
 
+    def test_padded_identifiers_cannot_disguise_duplicate_units_specimens_or_traces(self):
+        for key in ("biological_unit_id", "original_specimen_id", "source_trace_id"):
+            document = copy.deepcopy(self.document)
+            document["specimens"]["b"][key] = "a "
+            with self.subTest(key=key), self.assertRaisesRegex(ValueError, key):
+                self.qualify(document)
+
+    def test_role_counts_keep_subsamples_distinct_from_biological_units(self):
+        raw = self.csv.read_bytes() + b"c,0,0.1\nc,50,0.15\nc,100,0.2\n"
+        self.csv.write_bytes(raw)
+        self.document["csv_sha256"] = hashlib.sha256(raw).hexdigest()
+        self.document["specimens"]["c"] = dict(self.document["specimens"]["a"],
+                                               original_specimen_id="c", source_trace_id="c")
+        report = self.qualify()
+        self.assertEqual(report["counts_by_role"], {
+            "calibration": {"biological_units": 1, "specimens": 2, "radial_points": 6},
+            "validation": {"biological_units": 1, "specimens": 1, "radial_points": 3},
+        })
+
     def test_rejects_original_specimen_split_into_multiple_ids(self):
         document = copy.deepcopy(self.document); document["specimens"]["b"]["original_specimen_id"] = "a"
         with self.assertRaisesRegex(ValueError, "original specimen"):

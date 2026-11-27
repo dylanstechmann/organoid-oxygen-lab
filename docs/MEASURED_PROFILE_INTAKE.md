@@ -46,6 +46,31 @@ data. It executes no author code and does not turn figures into measurements.
 Raw author files remain local artifacts; original code and curated audit text
 remain MIT. The author archive remains CC BY 4.0 with the attribution above.
 
+## Frozen-catalog qualification table
+
+Generate a reviewable table solely from the frozen catalog, without fetching or
+fitting anything:
+
+```bash
+oxygenlab qualify-sources docs/public-source-qualification.json --out artifacts/new-source-qualification
+```
+
+The fresh directory contains `qualification.json`, `qualification.csv` and
+`REPORT.md`; a [generated copy](../examples/source-qualification/REPORT.md) is
+included for review. Each row retains source identity/link and the archived
+reuse-terms observation alongside individual observations, calibration records
+and independent calibration/validation biological-unit IDs. The latter three
+fields are absent from this frozen catalog, so they remain explicitly missing
+and each source retains its archived exclusions plus field-specific reasons.
+Empty table cells mean unavailable evidence, not zero observations.
+
+The command reports two candidates and **zero eligible raw cohorts** with
+`completed_zero_eligible_raw_cohorts`. This is a successful, bounded outcome of
+the archived search, not evidence that no suitable public dataset exists. It
+adds no observations or reviewer decisions. Reuse-terms text is not a legal
+review, and metadata completeness would not replace the raw-profile intake gate
+below.
+
 ## Measurement cohort intake
 
 The new command checks a source-linked cohort before future fitting:
@@ -104,6 +129,12 @@ using bytes hashes. Multiple genuinely separate traces may share one native
 file if their original trace identities are distinct and supported. Source
 paths must stay inside the manifest directory. Do not split radial positions
 from one specimen into training and validation.
+
+Use the exact source identifiers for biological units, original specimens and
+source traces. Leading or trailing whitespace in these fields fails intake.
+The report gives the number of biological units, specimens and sampled radial
+points separately for each role in `counts_by_role`. Multiple source traces
+can share one biological unit within a role.
 
 The full specimen records, source hashes and manifest hash are included in the
 report. The gate checks declared provenance and identity consistency; it cannot

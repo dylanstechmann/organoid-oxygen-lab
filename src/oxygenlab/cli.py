@@ -772,9 +772,37 @@ def write_critical_radius(output, parameters=None, *, tolerance_um=0.01, max_rad
     return report
 
 
+def source_qualification(catalog_path, output):
+    """Publish a deterministic table of archived source eligibility and exclusions."""
+    from oxygenlab.source_qualification import (
+        qualification_csv_rows,
+        qualification_markdown,
+        qualify_source_catalog,
+    )
+
+    report = qualify_source_catalog(catalog_path)
+    rows = qualification_csv_rows(report)
+    fieldnames = [
+        "source_id", "doi", "source_url", "reuse_terms", "individual_observations",
+        "calibration_record", "independent_unit_ids", "eligibility", "exclusion_reasons",
+    ]
+    with _report_directory(output) as staged:
+        (staged / "qualification.json").write_text(
+            json.dumps(report, indent=2, ensure_ascii=False, allow_nan=False) + "\n", encoding="utf-8")
+        with (staged / "qualification.csv").open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=fieldnames, lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(rows)
+        (staged / "REPORT.md").write_text(qualification_markdown(report), encoding="utf-8")
+    return report
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Conservative spherical oxygen transport model")
     commands = parser.add_subparsers(dest="command", required=True)
+    sources = commands.add_parser("qualify-sources", help="tabulate frozen source-catalog eligibility and exclusions; no fetching or fitting")
+    sources.add_argument("catalog")
+    sources.add_argument("--out", required=True)
     qualify = commands.add_parser("qualify-profiles", help="check source-linked measured profiles and held-out biological units; no fitting")
     qualify.add_argument("csv")
     qualify.add_argument("manifest")
@@ -851,6 +879,8 @@ def main(argv=None):
                          "These are geometric regions outside the span, not measured oxygen-volume fractions. Adding center/surface points makes those outer regions zero but still leaves unsampled locations between the points.", "",
                          "The largest internal radial gap is 30% of radius in the first case and 50% in the endpoint case. Neither number is an assay-adequacy threshold.", ""]
                 (staged / "REPORT.md").write_text("\n".join(lines), encoding="utf-8")
+        elif args.command == "qualify-sources":
+            report = source_qualification(args.catalog, args.out)
         elif args.command == "qualify-profiles":
             from oxygenlab.measurement_intake import qualify_profiles
             report = qualify_profiles(args.csv, args.manifest)
