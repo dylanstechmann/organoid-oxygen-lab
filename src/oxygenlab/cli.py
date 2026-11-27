@@ -859,7 +859,13 @@ def main(argv=None):
                 lines = ["# Measured oxygen profile intake", "", report["status"], "",
                          f"Source: {report['source_url']}. License: {report['license']}.",
                          f"Declared specimens: {report['n_specimens']}; biological units: {report['n_biological_units']}.", "",
-                         "No parameter fitting or biological validation was performed.", "", *report["limits"], ""]
+                         "| Role | Biological units | Specimens | Radial points |",
+                         "| --- | ---: | ---: | ---: |"]
+                for role, counts in report["counts_by_role"].items():
+                    lines.append(f"| {role} | {counts['biological_units']} | {counts['specimens']} | {counts['radial_points']} |")
+                lines.extend(["", f"Profile source files shared across roles by SHA-256: {len(report['shared_profile_source_sha256'])}.",
+                              "A shared file can contain separate traces from distinct declared biological units."])
+                lines.extend(["", "No parameter fitting or biological validation was performed.", "", *report["limits"], ""])
                 (staged / "REPORT.md").write_text("\n".join(lines), encoding="utf-8")
         elif args.command == "demo":
             report = demo(args.out, plot=args.plot)

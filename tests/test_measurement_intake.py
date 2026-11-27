@@ -72,10 +72,52 @@ class MeasuredProfileTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "both calibration and validation"):
             self.qualify(document)
 
+    def test_padded_identifiers_cannot_disguise_duplicate_units_specimens_or_traces(self):
+        for key in ("biological_unit_id", "original_specimen_id", "source_trace_id"):
+            document = copy.deepcopy(self.document)
+            document["specimens"]["b"][key] = "a "
+            with self.subTest(key=key), self.assertRaisesRegex(ValueError, key):
+                self.qualify(document)
+
+    def test_role_counts_keep_subsamples_distinct_from_biological_units(self):
+        raw = self.csv.read_bytes() + b"c,0,0.1\nc,50,0.15\nc,100,0.2\n"
+        self.csv.write_bytes(raw)
+        self.document["csv_sha256"] = hashlib.sha256(raw).hexdigest()
+        self.document["specimens"]["c"] = dict(self.document["specimens"]["a"],
+                                               original_specimen_id="c", source_trace_id="c")
+        report = self.qualify()
+        self.assertEqual(report["counts_by_role"], {
+            "calibration": {"biological_units": 1, "specimens": 2, "radial_points": 6},
+            "validation": {"biological_units": 1, "specimens": 1, "radial_points": 3},
+        })
+
+    def test_csv_specimen_ids_must_match_the_manifest_exactly(self):
+        raw = self.csv.read_bytes().replace(b"a,50", b" a,50")
+        self.csv.write_bytes(raw)
+        self.document["csv_sha256"] = hashlib.sha256(raw).hexdigest()
+        with self.assertRaisesRegex(ValueError, "row 3: specimen_id"):
+            self.qualify()
+
     def test_rejects_original_specimen_split_into_multiple_ids(self):
         document = copy.deepcopy(self.document); document["specimens"]["b"]["original_specimen_id"] = "a"
         with self.assertRaisesRegex(ValueError, "original specimen"):
             self.qualify(document)
+
+    def test_shared_profile_sources_follow_verified_bytes_across_role_aliases(self):
+        digest = self.document["source_files"]["native"]["sha256"]
+        other = self.root / "other-export.txt"
+        other.write_bytes(b"independent constructed export")
+        distinct = hashlib.sha256(other.read_bytes()).hexdigest()
+        self.document["source_files"].update(alias=dict(self.document["source_files"]["native"]),
+                                             other={"path": other.name, "sha256": distinct})
+        self.document["specimens"]["b"]["source_file"] = "alias"
+        shared = self.qualify()
+        self.assertEqual(shared["shared_profile_source_sha256"], [digest])
+        self.assertEqual(shared["profile_source_sha256_by_role"], {"calibration": [digest], "validation": [digest]})
+        self.document["specimens"]["b"]["source_file"] = "other"
+        separate = self.qualify()
+        self.assertEqual(separate["shared_profile_source_sha256"], [])
+        self.assertEqual(separate["profile_source_sha256_by_role"], {"calibration": [digest], "validation": [distinct]})
 
     def test_rejects_source_trace_aliases_as_replicates(self):
         document = copy.deepcopy(self.document)
@@ -140,6 +182,10 @@ class MeasuredProfileTests(unittest.TestCase):
             self.assertEqual(main(["qualify-profiles", str(self.csv), str(self.manifest), "--out", str(output)]), 0)
         report = json.loads((output / "qualification.json").read_text())
         self.assertFalse(report["biological_validation_performed"])
+        summary = (output / "REPORT.md").read_text(encoding="utf-8")
+        self.assertIn("Profile source files shared across roles by SHA-256: 1.", summary)
+        for role in ("calibration", "validation"):
+            self.assertIn(f"| {role} | 1 | 1 | 3 |", summary)
         self.assertFalse((output / "parameters.json").exists())
         with self.assertRaises(SystemExit):
             main(["qualify-profiles", str(self.csv), str(self.manifest), "--out", str(output)])

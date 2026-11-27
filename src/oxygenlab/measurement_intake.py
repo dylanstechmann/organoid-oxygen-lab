@@ -81,17 +81,20 @@ def qualify_profiles(csv_path, manifest_path):
     for line, row in enumerate(reader, 2):
         if None in row or any(value is None for value in row.values()) or not row["specimen_id"].strip():
             raise ValueError(f"row {line}: incomplete oxygen profile")
+        if row["specimen_id"] != row["specimen_id"].strip():
+            raise ValueError(f"row {line}: specimen_id contains surrounding whitespace")
         try:
             radius, concentration = float(row["radius_um"]), float(row["oxygen_mol_m3"])
         except ValueError as exc:
             raise ValueError(f"row {line}: invalid radius/concentration") from exc
         if not math.isfinite(radius) or not math.isfinite(concentration) or radius < 0 or concentration < 0:
             raise ValueError(f"row {line}: radius and concentration must be finite and nonnegative")
-        profiles.setdefault(row["specimen_id"].strip(), []).append((radius, concentration))
+        profiles.setdefault(row["specimen_id"], []).append((radius, concentration))
     specimens = document.get("specimens")
     if not profiles or not isinstance(specimens, dict) or set(specimens) != set(profiles):
         raise ValueError("manifest must cover exactly all CSV specimens")
     original_ids, source_traces, biological_roles = set(), set(), {}
+    profile_sources = {"calibration": set(), "validation": set()}
     summary = []
     for specimen_id, points in profiles.items():
         record = specimens[specimen_id]
@@ -99,6 +102,9 @@ def qualify_profiles(csv_path, manifest_path):
             raise ValueError(f"invalid specimen record: {specimen_id}")  # noqa: TRY004 -- external manifest validation
         for key in ("original_specimen_id", "biological_unit_id", "source_trace_id", "biological_identity_record", "sensor_calibration_record", "radius_measurement_record", "bath_measurement_record", "steady_state_record", "cell_type", "culture_conditions"):
             _text(record, key)
+        for key in ("original_specimen_id", "biological_unit_id", "source_trace_id"):
+            if record[key] != record[key].strip():
+                raise ValueError(f"{key} must have no leading or trailing whitespace")
         if record.get("geometry") != "sphere" or record.get("steady_state") is not True or record.get("complete_profile") is not True:
             raise ValueError("complete steady spherical profile declarations required")
         role = record.get("role")
@@ -119,6 +125,7 @@ def qualify_profiles(csv_path, manifest_path):
         if identity in source_traces:
             raise ValueError("one source trace cannot be split into replicate specimens")
         source_traces.add(identity)
+        profile_sources[role].add(verified[file_id])
         _number(record, "temperature_degC")
         specimen_radius = _number(record, "specimen_radius_um")
         bath = _number(record, "bath_oxygen_mol_m3")
@@ -139,6 +146,14 @@ def qualify_profiles(csv_path, manifest_path):
             "license": document["license"], "attribution": document["attribution"],
             "acquisition_record": document["acquisition_record"], "specimen_records": specimens,
             "n_specimens": len(summary), "n_biological_units": len(biological_roles), "profiles": summary,
+            "profile_source_sha256_by_role": {role: sorted(digests) for role, digests in profile_sources.items()},
+            "shared_profile_source_sha256": sorted(profile_sources["calibration"] & profile_sources["validation"]),
+            "counts_by_role": {
+                role: {"specimens": sum(row["role"] == role for row in summary),
+                       "biological_units": sum(value == role for value in biological_roles.values()),
+                       "radial_points": sum(row["n_points"] for row in summary if row["role"] == role)}
+                for role in ("calibration", "validation")
+            },
             "model_fitted": False, "biological_validation_performed": False,
             "limits": ["Intake checks declared source identity and units; it cannot authenticate measurements or prove spherical homogeneity.",
                        "No oxygen model has been fitted or scored against these profiles.",
