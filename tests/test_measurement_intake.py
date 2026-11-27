@@ -91,6 +91,13 @@ class MeasuredProfileTests(unittest.TestCase):
             "validation": {"biological_units": 1, "specimens": 1, "radial_points": 3},
         })
 
+    def test_csv_specimen_ids_must_match_the_manifest_exactly(self):
+        raw = self.csv.read_bytes().replace(b"a,50", b" a,50")
+        self.csv.write_bytes(raw)
+        self.document["csv_sha256"] = hashlib.sha256(raw).hexdigest()
+        with self.assertRaisesRegex(ValueError, "row 3: specimen_id"):
+            self.qualify()
+
     def test_rejects_original_specimen_split_into_multiple_ids(self):
         document = copy.deepcopy(self.document); document["specimens"]["b"]["original_specimen_id"] = "a"
         with self.assertRaisesRegex(ValueError, "original specimen"):
@@ -159,6 +166,9 @@ class MeasuredProfileTests(unittest.TestCase):
             self.assertEqual(main(["qualify-profiles", str(self.csv), str(self.manifest), "--out", str(output)]), 0)
         report = json.loads((output / "qualification.json").read_text())
         self.assertFalse(report["biological_validation_performed"])
+        summary = (output / "REPORT.md").read_text(encoding="utf-8")
+        for role in ("calibration", "validation"):
+            self.assertIn(f"| {role} | 1 | 1 | 3 |", summary)
         self.assertFalse((output / "parameters.json").exists())
         with self.assertRaises(SystemExit):
             main(["qualify-profiles", str(self.csv), str(self.manifest), "--out", str(output)])

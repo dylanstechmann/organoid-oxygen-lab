@@ -81,13 +81,15 @@ def qualify_profiles(csv_path, manifest_path):
     for line, row in enumerate(reader, 2):
         if None in row or any(value is None for value in row.values()) or not row["specimen_id"].strip():
             raise ValueError(f"row {line}: incomplete oxygen profile")
+        if row["specimen_id"] != row["specimen_id"].strip():
+            raise ValueError(f"row {line}: specimen_id contains surrounding whitespace")
         try:
             radius, concentration = float(row["radius_um"]), float(row["oxygen_mol_m3"])
         except ValueError as exc:
             raise ValueError(f"row {line}: invalid radius/concentration") from exc
         if not math.isfinite(radius) or not math.isfinite(concentration) or radius < 0 or concentration < 0:
             raise ValueError(f"row {line}: radius and concentration must be finite and nonnegative")
-        profiles.setdefault(row["specimen_id"].strip(), []).append((radius, concentration))
+        profiles.setdefault(row["specimen_id"], []).append((radius, concentration))
     specimens = document.get("specimens")
     if not profiles or not isinstance(specimens, dict) or set(specimens) != set(profiles):
         raise ValueError("manifest must cover exactly all CSV specimens")
