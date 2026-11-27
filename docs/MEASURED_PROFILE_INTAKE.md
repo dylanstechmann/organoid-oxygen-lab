@@ -105,6 +105,12 @@ file if their original trace identities are distinct and supported. Source
 paths must stay inside the manifest directory. Do not split radial positions
 from one specimen into training and validation.
 
+Use the exact source identifiers for biological units, original specimens and
+source traces. Leading or trailing whitespace in these fields fails intake.
+The report gives the number of biological units, specimens and sampled radial
+points separately for each role in `counts_by_role`. Multiple source traces
+can share one biological unit within a role.
+
 The full specimen records, source hashes and manifest hash are included in the
 report. The gate checks declared provenance and identity consistency; it cannot
 authenticate acquisition or catch deliberately falsified biological IDs.

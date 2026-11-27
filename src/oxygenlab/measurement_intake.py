@@ -99,6 +99,9 @@ def qualify_profiles(csv_path, manifest_path):
             raise ValueError(f"invalid specimen record: {specimen_id}")  # noqa: TRY004 -- external manifest validation
         for key in ("original_specimen_id", "biological_unit_id", "source_trace_id", "biological_identity_record", "sensor_calibration_record", "radius_measurement_record", "bath_measurement_record", "steady_state_record", "cell_type", "culture_conditions"):
             _text(record, key)
+        for key in ("original_specimen_id", "biological_unit_id", "source_trace_id"):
+            if record[key] != record[key].strip():
+                raise ValueError(f"{key} must have no leading or trailing whitespace")
         if record.get("geometry") != "sphere" or record.get("steady_state") is not True or record.get("complete_profile") is not True:
             raise ValueError("complete steady spherical profile declarations required")
         role = record.get("role")
@@ -139,6 +142,12 @@ def qualify_profiles(csv_path, manifest_path):
             "license": document["license"], "attribution": document["attribution"],
             "acquisition_record": document["acquisition_record"], "specimen_records": specimens,
             "n_specimens": len(summary), "n_biological_units": len(biological_roles), "profiles": summary,
+            "counts_by_role": {
+                role: {"specimens": sum(row["role"] == role for row in summary),
+                       "biological_units": sum(value == role for value in biological_roles.values()),
+                       "radial_points": sum(row["n_points"] for row in summary if row["role"] == role)}
+                for role in ("calibration", "validation")
+            },
             "model_fitted": False, "biological_validation_performed": False,
             "limits": ["Intake checks declared source identity and units; it cannot authenticate measurements or prove spherical homogeneity.",
                        "No oxygen model has been fitted or scored against these profiles.",
