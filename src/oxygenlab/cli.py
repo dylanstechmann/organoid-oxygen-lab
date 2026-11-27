@@ -863,6 +863,8 @@ def main(argv=None):
                          "| --- | ---: | ---: | ---: |"]
                 for role, counts in report["counts_by_role"].items():
                     lines.append(f"| {role} | {counts['biological_units']} | {counts['specimens']} | {counts['radial_points']} |")
+                lines.extend(["", f"Profile source files shared across roles by SHA-256: {len(report['shared_profile_source_sha256'])}.",
+                              "A shared file can contain separate traces from distinct declared biological units."])
                 lines.extend(["", "No parameter fitting or biological validation was performed.", "", *report["limits"], ""])
                 (staged / "REPORT.md").write_text("\n".join(lines), encoding="utf-8")
         elif args.command == "demo":

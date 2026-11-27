@@ -103,6 +103,22 @@ class MeasuredProfileTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "original specimen"):
             self.qualify(document)
 
+    def test_shared_profile_sources_follow_verified_bytes_across_role_aliases(self):
+        digest = self.document["source_files"]["native"]["sha256"]
+        other = self.root / "other-export.txt"
+        other.write_bytes(b"independent constructed export")
+        distinct = hashlib.sha256(other.read_bytes()).hexdigest()
+        self.document["source_files"].update(alias=dict(self.document["source_files"]["native"]),
+                                             other={"path": other.name, "sha256": distinct})
+        self.document["specimens"]["b"]["source_file"] = "alias"
+        shared = self.qualify()
+        self.assertEqual(shared["shared_profile_source_sha256"], [digest])
+        self.assertEqual(shared["profile_source_sha256_by_role"], {"calibration": [digest], "validation": [digest]})
+        self.document["specimens"]["b"]["source_file"] = "other"
+        separate = self.qualify()
+        self.assertEqual(separate["shared_profile_source_sha256"], [])
+        self.assertEqual(separate["profile_source_sha256_by_role"], {"calibration": [digest], "validation": [distinct]})
+
     def test_rejects_source_trace_aliases_as_replicates(self):
         document = copy.deepcopy(self.document)
         document["source_files"]["alias"] = copy.deepcopy(document["source_files"]["native"])
@@ -167,6 +183,7 @@ class MeasuredProfileTests(unittest.TestCase):
         report = json.loads((output / "qualification.json").read_text())
         self.assertFalse(report["biological_validation_performed"])
         summary = (output / "REPORT.md").read_text(encoding="utf-8")
+        self.assertIn("Profile source files shared across roles by SHA-256: 1.", summary)
         for role in ("calibration", "validation"):
             self.assertIn(f"| {role} | 1 | 1 | 3 |", summary)
         self.assertFalse((output / "parameters.json").exists())

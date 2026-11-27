@@ -111,6 +111,11 @@ The report gives the number of biological units, specimens and sampled radial
 points separately for each role in the Markdown table and JSON `counts_by_role`. Multiple source traces
 can share one biological unit within a role.
 
+`profile_source_sha256_by_role` lists the distinct source file digests used by each
+role's profiles. `shared_profile_source_sha256` lists digests used on both sides
+even if the manifest gives the same bytes different file IDs. The Markdown report
+counts these shared files. One export can contain distinct traces from both roles.
+
 The full specimen records, source hashes and manifest hash are included in the
 report. The gate checks declared provenance and identity consistency; it cannot
 authenticate acquisition or catch deliberately falsified biological IDs.

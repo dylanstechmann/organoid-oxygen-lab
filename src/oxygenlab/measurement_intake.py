@@ -94,6 +94,7 @@ def qualify_profiles(csv_path, manifest_path):
     if not profiles or not isinstance(specimens, dict) or set(specimens) != set(profiles):
         raise ValueError("manifest must cover exactly all CSV specimens")
     original_ids, source_traces, biological_roles = set(), set(), {}
+    profile_sources = {"calibration": set(), "validation": set()}
     summary = []
     for specimen_id, points in profiles.items():
         record = specimens[specimen_id]
@@ -124,6 +125,7 @@ def qualify_profiles(csv_path, manifest_path):
         if identity in source_traces:
             raise ValueError("one source trace cannot be split into replicate specimens")
         source_traces.add(identity)
+        profile_sources[role].add(verified[file_id])
         _number(record, "temperature_degC")
         specimen_radius = _number(record, "specimen_radius_um")
         bath = _number(record, "bath_oxygen_mol_m3")
@@ -144,6 +146,8 @@ def qualify_profiles(csv_path, manifest_path):
             "license": document["license"], "attribution": document["attribution"],
             "acquisition_record": document["acquisition_record"], "specimen_records": specimens,
             "n_specimens": len(summary), "n_biological_units": len(biological_roles), "profiles": summary,
+            "profile_source_sha256_by_role": {role: sorted(digests) for role, digests in profile_sources.items()},
+            "shared_profile_source_sha256": sorted(profile_sources["calibration"] & profile_sources["validation"]),
             "counts_by_role": {
                 role: {"specimens": sum(row["role"] == role for row in summary),
                        "biological_units": sum(value == role for value in biological_roles.values()),
